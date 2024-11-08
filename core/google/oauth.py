@@ -1,53 +1,77 @@
 import logging
+from datetime import datetime
 
+import requests
+from fastapi import HTTPException
 from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 from sqlalchemy.orm import Session
 
 from core.config import config
-from core.google.user_service import get_user
+from core.jwt import jwt
+from models.database_models.identity import Identity
+from models.user import GoogleUser
 
 log = logging.getLogger(__name__)
 
 flow = Flow.from_client_secrets_file(
-    client_secrets_file=config['auth']['google']['client_secret_file'],
-    scopes=[
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'openid'
-    ]
+  client_secrets_file=config['auth']['google']['client_secret_file'],
+  scopes=[
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'openid'
+  ]
 )
 flow.redirect_uri = config['auth']['google']['redirect_uri']
 
+
 def start_authentication():
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true'
-    )
+  authorization_url, state = flow.authorization_url(
+    access_type='offline',
+    include_granted_scopes='true'
+  )
 
-    return authorization_url, state
+  return authorization_url, state
 
+def get_access_token(code: str):
+  return flow.fetch_token(code=code)['access_token']
 
-def complete_oauth_flow(code: str, db: Session):
-    # fetch user_service info
-    flow.fetch_token(code=code)
-    credentials = flow.credentials
-    google_user = get_user(credentials)
-'''
-    # check if user exists
-    user = authentication.auth_methods_service.find_user(google_user.id, OAuthMethods.GOOGLE, db)
+def get_google_user(access_token: str) -> GoogleUser:
+  response = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", params={"access_token": access_token})
+  if response.status_code != 200:
+    log.error("Failed to get user profile from Google. status_code={status_code}".format(status_code=response.status_code))
+    raise HTTPException(status_code=500, detail="Failed to get user profile from Google")
 
-    if user is None:
-        log.debug("Google user not found. Creating new user. google_id=\"{google_id}\", email=\"{email}\"".format(google_id=google_user.id, email=google_user.email))
-        user = User(
-            uname = google_user.uname,
-            email = google_user.email,
-            email_verified = google_user.email_verified
-        )
-        user = user_service.add_user(user, OAuthMethods.GOOGLE, {'google_id': google_user.id}, db)
-    else:
-        log.debug("Google user found. google_id=\"{google_id}\", email=\"{email}\"".format(google_id=google_user.id, email=google_user.email))
-        user.last_login = datetime.now()
+  profile = response.json()
 
-    jwt_token = jwt.create_token(user.uid, user.role)
-    return jwt_token
-'''
+  log.debug("Got user profile from Google. profile=\"{profile}\"".format(profile=profile))
+  google_user = GoogleUser(
+    username=profile['name'],
+    email=profile['email'],
+    email_verified=profile['email_verified'],
+    google_id=profile['sub'],
+    picture=profile['picture'],
+  )
+
+  return google_user
+
+def get_google_id(access_token: str) -> str:
+  response = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", params={"access_token": access_token})
+  if response.status_code != 200:
+    log.error(
+      "Failed to get user profile from Google. status_code={status_code}".format(status_code=response.status_code))
+    raise HTTPException(status_code=500, detail="Failed to get user profile from Google")
+
+  profile = response.json()
+
+  log.debug("Got user profile from Google. id=\"{id}\"".format(id=profile['sub']))
+
+  return profile['sub']
+
+def complete_authentication(identity: Identity, db: Session):
+  log.debug("Completing authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
+  identity.last_login = datetime.now()
+  identity.auth_lookup.google_method.last_used = datetime.now()
+
+  log.debug("Issued JWT. user_id=\"{user_id}\", role=\"{role}\"".format(user_id=identity.user_id, role=identity.role))
+  return jwt.create_token(identity.user_id, identity.role)

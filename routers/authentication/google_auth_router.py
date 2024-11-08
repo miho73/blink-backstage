@@ -1,23 +1,30 @@
 import logging
 
-from fastapi import Request, APIRouter, Depends
+from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, JSONResponse
 
+from core.authentication.auth_lookup_service import OAuthMethods, find_identity
 from core.config import config
 from core.cryptography import aes256
-from core.google.oauth import start_authentication, complete_oauth_flow
+from core.google.oauth import start_authentication, complete_authentication, get_google_user, get_google_id, \
+  get_access_token
+from core.google.recaptcha import verify_recaptcha
+from core.user.add_user import add_google_user
 from database.database import create_connection
+from models.request_models.RegisterRequests import GoogleRegisterRequest
+from models.user import GoogleUser
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/api/auth/google",
-    tags=["google", "authentication"]
+  prefix="/api/auth/google",
+  tags=["google", "authentication"]
 )
 
+
 @router.get(
-  path="/web/begin"
+  path="/login"
 )
 def start_google_login():
   log.info("Redirecting to Google OAuth signin")
@@ -39,16 +46,15 @@ def start_google_login():
 
   return response
 
-@router.get(
-  path="/web/callback"
-)
-def complete_google_login(request: Request, db: Session = Depends(create_connection)):
-  log.info("Handling Google OAuth2 Callback")
 
-  if request.query_params.get("error"):
-    log.error(
-      "Google OAuth2 signin returned an error. error=\"{error}\"".format(error=request.query_params.get("error")))
-    return RedirectResponse("/auth?error=google_error", 302)
+@router.get(
+  path="/callback"
+)
+def callback_google_login(
+  request: Request,
+  db: Session = Depends(create_connection)
+):
+  log.info("Handling Google OAuth2 callback")
 
   # check state
   e_cookie_state = request.cookies.get("with-state")
@@ -68,22 +74,49 @@ def complete_google_login(request: Request, db: Session = Depends(create_connect
     log.error("States from cookie and callback does not match")
     return RedirectResponse("/auth?error=state_mismatch", 302)
 
-  # check code
+  # check if user exists in google methods
   code = request.query_params.get("code")
-  if code is None:
-    log.error("Code from callback is not set")
-    return RedirectResponse("/auth?error=code_unset", 302)
+  access_token = get_access_token(code)
+  google_id: str = get_google_id(access_token)
+  identity = find_identity(google_id, OAuthMethods.GOOGLE, db)
 
-  try:
-    log.debug("Complete Google OAuth flow. oauth2_code=\"{code}\"".format(code=code))
-    jwt = complete_oauth_flow(code, db)
+  if identity is None:
+    log.info("User does not exist in Google Methods. Redirecting to registration. google_id=\"{}\"".format(google_id))
+    return RedirectResponse(
+      "/auth/register/google?code={}".format(access_token), 302)
+
+  else:
+    log.info("User exists in Google Methods. Redirecting to login. google_id=\"{}\"".format(google_id))
+    jwt = complete_authentication(identity, db)
     db.commit()
-  except Exception as e:
-    log.error("Internal Server Error: {error}".format(error=str(e)), exc_info=e)
-    return RedirectResponse("/auth?error=internal_server_error", 302)
+    response = RedirectResponse("/auth/complete?jwt={jwt}".format(jwt=jwt), 302)
+    response.delete_cookie("with-state")
+    return response
 
-  log.debug("Redirecting to frontend with JWT token. jwt=\"{jwt}\"".format(jwt=jwt))
-  response = RedirectResponse("/auth/complete?jwt={jwt}".format(jwt=jwt), 302)
-  response.delete_cookie('with-state')
+@router.post(
+  path="/register"
+)
+def register_google_user(
+  body: GoogleRegisterRequest,
+  request: Request,
+  db: Session = Depends(create_connection)
+):
+  log.debug("Registering Google User")
 
+  # google recaptcha
+  if verify_recaptcha(body.recaptcha, request.client.host, "signup/google") is False:
+    log.error("Recaptcha verification failed")
+    raise HTTPException(status_code=400, detail="Recaptcha failed")
+
+  add_google_user(body, db)
+  db.commit()
+
+  response = JSONResponse(
+    status_code=201,
+    content={
+      "code": 201,
+      "state": "CREATED",
+    }
+  )
+  response.delete_cookie("with-state")
   return response
