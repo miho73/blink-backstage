@@ -11,6 +11,7 @@ from core.google.oauth import start_authentication, complete_authentication, get
   get_access_token
 from core.google.recaptcha import verify_recaptcha
 from core.user.add_user import add_google_user
+from core.validation import validate_all, length_check, regex_check, length_check_min
 from database.database import create_connection
 from models.request_models.RegisterRequests import GoogleRegisterRequest
 from models.user import GoogleUser
@@ -87,7 +88,7 @@ def callback_google_login(
 
   else:
     log.info("User exists in Google Methods. Redirecting to login. google_id=\"{}\"".format(google_id))
-    jwt = complete_authentication(identity, db)
+    jwt = complete_authentication(identity)
     db.commit()
     response = RedirectResponse("/auth/complete?jwt={jwt}".format(jwt=jwt), 302)
     response.delete_cookie("with-state")
@@ -102,6 +103,14 @@ def register_google_user(
   db: Session = Depends(create_connection)
 ):
   log.debug("Registering Google User")
+
+  # form validation
+  if validate_all(
+    body.recaptcha is not None,
+    length_check(body.username, 1, 100),
+  ):
+    log.debug("Form validation failed")
+    raise HTTPException(status_code=400, detail="Form validation failed")
 
   # google recaptcha
   if verify_recaptcha(body.recaptcha, request.client.host, "signup/google") is False:

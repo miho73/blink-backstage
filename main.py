@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from routers.authentication import google_auth_router, authorization
+from routers.authentication import google_auth_router, authorization, password_auth_router
 from routers.error_handler import add_error_handler
 from routers.user import user
 
@@ -18,6 +18,7 @@ log.info("Starting server")
 
 app.include_router(authorization.router)
 app.include_router(google_auth_router.router)
+app.include_router(password_auth_router.router)
 app.include_router(user.router)
 
 add_error_handler(app)

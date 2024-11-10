@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from models.database_models.google_method import GoogleMethod
 from models.database_models.identity import Identity
+from models.database_models.password_method import PasswordMethod
 
 
 class OAuthMethods(Enum):
@@ -21,3 +22,11 @@ def find_identity(identifier: str, provider: OAuthMethods, db: Session) -> Optio
       return None
 
     return google_auth.auth_lookup.identity
+
+  elif provider == OAuthMethods.PASSWORD:
+    password_auth: Optional[PasswordMethod] = db.query(PasswordMethod).filter(PasswordMethod.user_id == identifier).first()
+
+    if password_auth is None:
+        return None
+
+    return password_auth.auth_lookup.identity

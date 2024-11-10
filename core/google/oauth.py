@@ -68,7 +68,7 @@ def get_google_id(access_token: str) -> str:
 
   return profile['sub']
 
-def complete_authentication(identity: Identity, db: Session):
+def complete_authentication(identity: Identity):
   log.debug("Completing authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
   identity.last_login = datetime.now()
   identity.auth_lookup.google_method.last_used = datetime.now()

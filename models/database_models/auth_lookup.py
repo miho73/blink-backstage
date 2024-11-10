@@ -19,3 +19,4 @@ class AuthLookup(TableBase):
   identity = relationship("Identity", back_populates="auth_lookup")
 
   google_method = relationship("GoogleMethod", back_populates="auth_lookup", uselist=False)
+  password_method = relationship("PasswordMethod", back_populates="auth_lookup", uselist=False)
