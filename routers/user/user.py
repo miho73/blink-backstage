@@ -40,6 +40,7 @@ def get_user(
         "role": identity.role.name,
         "user_id": identity.user_id,
         "email": identity.email,
+        "emailVerified": identity.email_verified,
         "username": identity.username,
         "last_login": identity.last_login.isoformat(),
         "student_verified": identity.student_verified
