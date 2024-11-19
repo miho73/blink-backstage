@@ -7,14 +7,12 @@ from starlette.responses import RedirectResponse, JSONResponse
 from core.authentication.auth_lookup_service import OAuthMethods, find_identity
 from core.config import config
 from core.cryptography import aes256
-from core.google.oauth import start_authentication, complete_authentication, get_google_user, get_google_id, \
+from core.google.oauth import start_authentication, complete_authentication, get_google_id, \
   get_access_token
 from core.google.recaptcha import verify_recaptcha
 from core.user.add_user import add_google_user
-from core.validation import validate_all, length_check, regex_check, length_check_min
 from database.database import create_connection
-from models.request_models.RegisterRequests import GoogleRegisterRequest
-from models.user import GoogleUser
+from models.request_models.register_request import GoogleRegisterRequest
 
 log = logging.getLogger(__name__)
 
@@ -94,6 +92,7 @@ def callback_google_login(
     response.delete_cookie("with-state")
     return response
 
+
 @router.post(
   path="/register"
 )
@@ -104,17 +103,9 @@ def register_google_user(
 ):
   log.debug("Registering Google User")
 
-  # form validation
-  if validate_all(
-    body.recaptcha is not None,
-    length_check(body.username, 1, 100),
-  ):
-    log.debug("Form validation failed")
-    raise HTTPException(status_code=400, detail="Form validation failed")
-
   # google recaptcha
   if verify_recaptcha(body.recaptcha, request.client.host, "signup/google") is False:
-    log.error("Recaptcha verification failed")
+    log.error("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   add_google_user(body, db)

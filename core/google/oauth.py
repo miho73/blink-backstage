@@ -4,8 +4,6 @@ from datetime import datetime
 import requests
 from fastapi import HTTPException
 from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
-from sqlalchemy.orm import Session
 
 from core.config import config
 from core.jwt import jwt
@@ -33,13 +31,16 @@ def start_authentication():
 
   return authorization_url, state
 
+
 def get_access_token(code: str):
   return flow.fetch_token(code=code)['access_token']
+
 
 def get_google_user(access_token: str) -> GoogleUser:
   response = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", params={"access_token": access_token})
   if response.status_code != 200:
-    log.error("Failed to get user profile from Google. status_code={status_code}".format(status_code=response.status_code))
+    log.error(
+      "Failed to get user profile from Google. status_code={status_code}".format(status_code=response.status_code))
     raise HTTPException(status_code=500, detail="Failed to get user profile from Google")
 
   profile = response.json()
@@ -55,6 +56,7 @@ def get_google_user(access_token: str) -> GoogleUser:
 
   return google_user
 
+
 def get_google_id(access_token: str) -> str:
   response = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", params={"access_token": access_token})
   if response.status_code != 200:
@@ -67,6 +69,7 @@ def get_google_id(access_token: str) -> str:
   log.debug("Got user profile from Google. id=\"{id}\"".format(id=profile['sub']))
 
   return profile['sub']
+
 
 def complete_authentication(identity: Identity):
   log.debug("Completing authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))

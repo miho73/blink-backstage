@@ -1,5 +1,4 @@
 import logging
-from os.path import pathsep
 
 from fastapi import APIRouter, Security
 from starlette.responses import JSONResponse
@@ -13,8 +12,9 @@ router = APIRouter(
   tags=['authorization']
 )
 
+
 @router.post(
-  path='/'
+  path=''
 )
 def authorize(
   auth: str = Security(authorization_header)

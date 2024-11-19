@@ -2,6 +2,7 @@ import re
 
 from pydantic import BaseModel, field_validator
 
+
 class PasswordRegisterRequest(BaseModel):
   username: str
   email: str
@@ -45,6 +46,7 @@ class PasswordRegisterRequest(BaseModel):
     if len(value) < 1 or len(value) > 100:
       raise ValueError("Name must be 1 to 100 characters long")
     return value
+
 
 class GoogleRegisterRequest(BaseModel):
   code: str

@@ -13,6 +13,7 @@ DB_ROLE_CODE_TO_ROLE = {
 
 KST = timezone(timedelta(hours=9))
 
+
 def create_token(user_id: int, role: Role) -> str:
   payload = {
     'aud': DB_ROLE_CODE_TO_ROLE[role],

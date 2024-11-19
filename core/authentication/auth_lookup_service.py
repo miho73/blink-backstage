@@ -16,7 +16,7 @@ class OAuthMethods(Enum):
 
 def find_identity(identifier: str, provider: OAuthMethods, db: Session) -> Optional[Identity]:
   if provider == OAuthMethods.GOOGLE:
-    google_auth: Optional[GoogleMethod] = db.query(GoogleMethod).filter(GoogleMethod.google_id == identifier).first()
+    google_auth = db.query(GoogleMethod).filter(GoogleMethod.google_id == identifier).first()
 
     if google_auth is None:
       return None
@@ -24,9 +24,9 @@ def find_identity(identifier: str, provider: OAuthMethods, db: Session) -> Optio
     return google_auth.auth_lookup.identity
 
   elif provider == OAuthMethods.PASSWORD:
-    password_auth: Optional[PasswordMethod] = db.query(PasswordMethod).filter(PasswordMethod.user_id == identifier).first()
+    password_auth = db.query(PasswordMethod).filter(PasswordMethod.user_id == identifier).first()
 
     if password_auth is None:
-        return None
+      return None
 
     return password_auth.auth_lookup.identity

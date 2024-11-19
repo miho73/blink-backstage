@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, TIMESTAMP
 from sqlalchemy.orm import relationship
@@ -13,6 +15,6 @@ class GoogleMethod(TableBase):
   lookup_id: int = Column(INTEGER, ForeignKey("authentication.auth_lookup.lookup_id"), unique=True, nullable=False)
   google_id: str = Column(VARCHAR, nullable=False, unique=True)
 
-  last_used: TIMESTAMP = Column(TIMESTAMP)
+  last_used: datetime = Column(TIMESTAMP)
 
   auth_lookup = relationship("AuthLookup", back_populates="google_method")

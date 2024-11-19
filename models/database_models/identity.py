@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, Enum
+from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, BOOLEAN, SMALLINT, TIMESTAMP
 from sqlalchemy.orm import relationship
 
@@ -24,6 +24,8 @@ class Identity(TableBase):
   student_verified: bool = Column(BOOLEAN, nullable=False, default=False)
   _role: Role = Column("role", SMALLINT, nullable=False, default=Role.USER.value)
 
+  auth_lookup = relationship("AuthLookup", back_populates="identity", uselist=False)
+
   @property
   def role(self):
     return Role(self._role)
@@ -31,5 +33,3 @@ class Identity(TableBase):
   @role.setter
   def role(self, value: Role):
     self._role = value.value
-
-  auth_lookup = relationship("AuthLookup", back_populates="identity", uselist=False)

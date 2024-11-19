@@ -1,18 +1,21 @@
 import logging
 
 from fastapi import APIRouter, Request, HTTPException
-from fastapi.params import Depends
+from fastapi.params import Depends, Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.auth_lookup_service import find_identity, OAuthMethods
-from core.authentication.password_authentication import password_authentication
+from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.password_authentication import password_authentication, change_password
 from core.google.recaptcha import verify_recaptcha
+from core.user import user_info
 from core.user.add_user import add_password_user
-from core.validation import validate_all, length_check, length_check_min, regex_check
 from database.database import create_connection
-from models.request_models.RegisterRequests import PasswordRegisterRequest
+from models.database_models import Identity
 from models.request_models.SigninModel import PasswordSigninRequest
+from models.request_models.password_request import UpdatePasswordRequest
+from models.request_models.register_request import PasswordRegisterRequest
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +23,7 @@ router = APIRouter(
   prefix='/api/auth/password',
   tags=['password']
 )
+
 
 @router.post(
   path='/signin'
@@ -33,7 +37,7 @@ def sign_in_password_user(
 
   # google recaptcha
   if verify_recaptcha(body.recaptcha, request.client.host, "signin/password") is False:
-    log.debug("Recaptcha verification failed")
+    log.debug("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   # signin
@@ -58,8 +62,9 @@ def sign_in_password_user(
       }
     )
 
+
 @router.post(
-  path = '/register'
+  path='/register'
 )
 def register_password_user(
   body: PasswordRegisterRequest,
@@ -68,25 +73,10 @@ def register_password_user(
 ):
   log.debug("Registering Password User")
 
-  # form validation
-  if validate_all(
-    length_check(body.username, 1, 100),
-    length_check(body.email, 5, 255),
-    regex_check(body.email, r'^[-.\w]+@([\w-]+\.)+[\w-]{2,4}$'),
-
-    length_check(body.id, 1, 255),
-    length_check_min(body.password, 6),
-
-    body.recaptcha is not None
-  ):
-    log.debug("Form validation failed")
-    raise HTTPException(status_code=400, detail="Form validation failed")
-
   # google recaptcha
   if verify_recaptcha(body.recaptcha, request.client.host, "signup/password") is False:
-    log.debug("Recaptcha verification failed")
+    log.debug("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
-
 
   add_password_user(body, db)
   db.commit()
@@ -101,3 +91,36 @@ def register_password_user(
   )
   return response
 
+
+@router.patch(
+  path='/update'
+)
+def update_password(
+  body: UpdatePasswordRequest,
+  request: Request,
+  auth: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.debug('Change password upon JWT. jwt=\"{}\"'.format(auth))
+
+  if verify_recaptcha(body.recaptcha, request.client.host, 'changePassword') is False:
+    log.debug("Recaptcha school_verification failed")
+    raise HTTPException(status_code=400, detail="Recaptcha failed")
+
+  token = authorize_jwt(auth)
+  sub = token.get("sub")
+
+  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  if identity is None:
+    log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
+    raise HTTPException(status_code=400, detail="Identity not found")
+
+  change_password(identity, body.current_password, body.new_password)
+  db.commit()
+
+  return JSONResponse(
+    content={
+      "code": 200,
+      "state": "OK"
+    }
+  )

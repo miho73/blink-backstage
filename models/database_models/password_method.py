@@ -1,4 +1,5 @@
 import datetime
+
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, CHAR, TIMESTAMP
 from sqlalchemy.orm import relationship
@@ -14,7 +15,7 @@ class PasswordMethod(TableBase):
   lookup_id: int = Column(INTEGER, ForeignKey("authentication.auth_lookup.lookup_id"), unique=True, nullable=False)
   auth_lookup = relationship("AuthLookup", back_populates="password_method")
 
-  user_id: str = Column(VARCHAR,  nullable=False, unique=True)
+  user_id: str = Column(VARCHAR, nullable=False, unique=True)
   password: str = Column(CHAR, nullable=False)
 
   last_changed: datetime = Column(TIMESTAMP, nullable=False, default="now()")
