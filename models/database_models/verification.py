@@ -4,6 +4,7 @@ from typing import Optional
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, TIMESTAMP, SMALLINT, BYTEA, VARCHAR
+from sqlalchemy.orm import relationship
 
 from database.database import TableBase
 
@@ -21,8 +22,12 @@ class SvEvidenceType(Enum):
 class SvState(Enum):
   DRAFT = 0
   REQUESTED = 1
-  APPROVED = 2
-  DENIED = 3
+  HOLDING = 2
+  ACCEPTED = 3
+  INVALID_EVIDENCE = 4
+  IDENTITY_MISMATCH = 5
+  INVALID_DOCUMENT = 6
+  DENIED = 7
 
 
 class SvRequest(TableBase):
@@ -43,6 +48,8 @@ class SvRequest(TableBase):
   school: str = Column(VARCHAR, nullable=False)
   _state: int = Column('state', SMALLINT, nullable=False, default=0)
   doc_code: str = Column(VARCHAR)
+
+  identity = relationship("Identity")
 
   @property
   def request_type(self):

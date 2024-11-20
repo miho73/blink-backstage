@@ -6,7 +6,7 @@ from core.school_verification import process_request
 from routers.authentication import google_auth_router, authorization, password_auth_router
 from routers.error_handler import add_error_handler
 from routers.school import school_access, neis_school
-from routers.school_verification import user_verification_info, get_verified
+from routers.school_verification import user_verification_info, get_verified, sv_access, sv_approve
 from routers.user import user, user_auth
 
 app = FastAPI(
@@ -29,6 +29,8 @@ app.include_router(get_verified.router)
 app.include_router(school_access.router)
 app.include_router(process_request.router)
 app.include_router(neis_school.router)
+app.include_router(sv_access.router)
+app.include_router(sv_approve.router)
 
 add_error_handler(app)
 

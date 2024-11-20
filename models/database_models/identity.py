@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, BOOLEAN, SMALLINT, TIMESTAMP
 from sqlalchemy.orm import relationship
 
@@ -22,8 +22,10 @@ class Identity(TableBase):
   last_login: datetime = Column(TIMESTAMP)
 
   student_verified: bool = Column(BOOLEAN, nullable=False, default=False)
+  school_id: int = Column(INTEGER, ForeignKey("school.schools.school_id"))
   _role: Role = Column("role", SMALLINT, nullable=False, default=Role.USER.value)
 
+  school = relationship("School", uselist=False)
   auth_lookup = relationship("AuthLookup", back_populates="identity", uselist=False)
 
   @property

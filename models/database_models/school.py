@@ -2,6 +2,7 @@ from enum import Enum
 
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT
+from sqlalchemy.orm import relationship
 
 from database.database import TableBase
 
@@ -32,6 +33,8 @@ class School(TableBase):
   address: str = Column(VARCHAR, nullable=False)
   _sex: int = Column("sex", SMALLINT, nullable=False)
   user_count: int = Column(INTEGER, nullable=False, default=0)
+
+  students = relationship("Identity", back_populates='school', uselist=True)
 
   @property
   def school_type(self):

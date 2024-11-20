@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization import authorization_header, authorize_jwt
-from core.school.school_service import get_school_list, add_new_school, delete_school
+from core.school.school_access_service import get_school_list, add_new_school, delete_school
 from database.database import create_connection
 from models.request_models.school_request import AddSchoolRequest
 
@@ -72,6 +72,9 @@ def get_list(
   if school_name is None:
     log.debug('School name was not given')
     raise HTTPException(status_code=400, detail='School name was not given')
+
+  if school_name == '':
+    school_name = None
 
   jsn = get_school_list(school_name, db)
 

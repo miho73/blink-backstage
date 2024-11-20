@@ -25,8 +25,11 @@ def add_new_request(sub: int, req: NewVerificationRequest, db: Session):
     .filter(
       and_(
         SvRequest.user_id == sub,
-        SvRequest.state != SvState.DENIED,
-        SvRequest.state != SvState.APPROVED
+        SvRequest._state != SvState.DENIED.value,
+        SvRequest._state != SvState.IDENTITY_MISMATCH.value,
+        SvRequest._state != SvState.INVALID_DOCUMENT.value,
+        SvRequest._state != SvState.INVALID_EVIDENCE.value,
+        SvRequest._state != SvState.ACCEPTED.value
       )
     )
     .first()

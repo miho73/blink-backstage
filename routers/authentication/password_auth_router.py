@@ -13,7 +13,7 @@ from core.user import user_info
 from core.user.add_user import add_password_user
 from database.database import create_connection
 from models.database_models import Identity
-from models.request_models.SigninModel import PasswordSigninRequest
+from models.request_models.signin_models import PasswordSigninRequest
 from models.request_models.password_request import UpdatePasswordRequest
 from models.request_models.register_request import PasswordRegisterRequest
 

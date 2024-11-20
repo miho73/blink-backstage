@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import HTTPException
+from sqlalchemy import desc, asc
 from sqlalchemy.orm import Session
 
 from models.database_models.school import School, SchoolType, Sex
@@ -11,7 +12,14 @@ log = logging.getLogger(__name__)
 def get_school_list(school_name:str, db: Session):
   schools = (
     db.query(School)
-      .filter(School.school_name.like('%'+school_name+'%'))
+      .filter(
+        School.school_name.like(
+          school_name is not None and
+          '%'+school_name+'%'
+          or '%'
+        )
+      )
+      .order_by(asc(School.school_id))
       .all()
   )
 
