@@ -5,18 +5,19 @@ from fastapi.params import Depends, Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.google.recaptcha import verify_recaptcha
-from core.school_verification.new_request import add_new_request, insert_evidence
+from core.school_verification.sv_request_service import add_new_request, insert_evidence
 from core.user import user_info
 from database.database import create_connection
 from models.database_models import Identity
-from models.request_models.school_verification_request import NewVerificationRequest
+from models.request_models.school_verification_requests import NewVerificationRequest
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv/clearance'
+  prefix='/api/sv/clearance',
+  tags=['sv']
 )
 
 

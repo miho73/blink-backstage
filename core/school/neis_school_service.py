@@ -11,7 +11,7 @@ SCHOOL_INFO_URL = config['api']['neis']['school_info']
 API_KEY = config['api']['neis']['key']
 
 
-def query_school_info(school_name: str):
+def query_school_info(school_name: str) -> list[dict]:
   response = requests.get(
     url='https://open.neis.go.kr/hub/schoolInfo',
     params={

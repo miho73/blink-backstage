@@ -5,15 +5,17 @@ from fastapi.params import Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.sv.sv_access_service import access_get_sv
 from database.database import create_connection
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv/access'
+  prefix='/api/sv/access',
+  tags=['sv', 'access api']
 )
+
 
 @router.get(
   path=''

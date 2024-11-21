@@ -7,12 +7,12 @@ from fastapi import HTTPException
 from core.cryptography import bcrypt
 from core.jwt import jwt
 from models.database_models import Identity
-from models.database_models.password_method import PasswordMethod
+from models.database_models.password_auth import PasswordMethod
 
 log = logging.getLogger(__name__)
 
 
-def password_authentication(identity: Identity, password: str) -> Optional[str]:
+def auth_with_password(identity: Identity, password: str) -> Optional[str]:
   stored_password = identity.auth_lookup.password_method.password
 
   if bcrypt.verify_bcrypt(password, stored_password):

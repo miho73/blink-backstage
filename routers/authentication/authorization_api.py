@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Security
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 
 log = logging.getLogger(__name__)
 

@@ -4,15 +4,15 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse, JSONResponse
 
-from core.authentication.auth_lookup_service import OAuthMethods, find_identity
+from core.authentication.auth_lookup_service import OAuthMethods, find_identity_from_auth_id
 from core.config import config
 from core.cryptography import aes256
-from core.google.oauth import start_authentication, complete_authentication, get_google_id, \
+from core.google.google_oauth import start_authentication, complete_authentication, get_google_id, \
   get_access_token
 from core.google.recaptcha import verify_recaptcha
 from core.user.add_user import add_google_user
 from database.database import create_connection
-from models.request_models.register_request import GoogleRegisterRequest
+from models.request_models.register_requests import GoogleRegisterRequest
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ def callback_google_login(
   code = request.query_params.get("code")
   access_token = get_access_token(code)
   google_id: str = get_google_id(access_token)
-  identity = find_identity(google_id, OAuthMethods.GOOGLE, db)
+  identity = find_identity_from_auth_id(google_id, OAuthMethods.GOOGLE, db)
 
   if identity is None:
     log.info("User does not exist in Google Methods. Redirecting to registration. google_id=\"{}\"".format(google_id))

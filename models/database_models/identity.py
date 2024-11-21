@@ -23,6 +23,7 @@ class Identity(TableBase):
 
   student_verified: bool = Column(BOOLEAN, nullable=False, default=False)
   school_id: int = Column(INTEGER, ForeignKey("school.schools.school_id"))
+  grade: int = Column(SMALLINT)
   _role: Role = Column("role", SMALLINT, nullable=False, default=Role.USER.value)
 
   school = relationship("School", uselist=False)

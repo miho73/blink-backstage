@@ -1,26 +1,27 @@
 import logging
 
 from fastapi import HTTPException
-from sqlalchemy import desc, asc
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
-from models.database_models.school import School, SchoolType, Sex
-from models.request_models.school_request import AddSchoolRequest
+from models.database_models.schools import School, SchoolType, Sex
+from models.request_models.school_requests import AddSchoolRequest
 
 log = logging.getLogger(__name__)
 
-def get_school_list(school_name:str, db: Session):
+
+def get_school_list(school_name: str, db: Session) -> list[dict]:
   schools = (
     db.query(School)
-      .filter(
-        School.school_name.like(
-          school_name is not None and
-          '%'+school_name+'%'
-          or '%'
-        )
+    .filter(
+      School.school_name.like(
+        school_name is not None and
+        '%' + school_name + '%'
+        or '%'
       )
-      .order_by(asc(School.school_id))
-      .all()
+    )
+    .order_by(asc(School.school_id))
+    .all()
   )
 
   ret = []
@@ -37,7 +38,8 @@ def get_school_list(school_name:str, db: Session):
     elif school.school_type is SchoolType.MIDDLE_SCHOOL:
       stype = '중학교'
     else:
-      log.debug('Unknown school type stored in db. school_type=\"{}\", school_uid=\"{}\"'.format(school.school_type, school.school_id))
+      log.debug('Unknown school type stored in db. school_type=\"{}\", school_uid=\"{}\"'.format(school.school_type,
+                                                                                                 school.school_id))
       raise HTTPException(status_code=500, detail='Database integrity')
 
     if school.sex is Sex.BOYS:
@@ -46,9 +48,9 @@ def get_school_list(school_name:str, db: Session):
       sex = '여'
     elif school.sex is Sex.MIXED:
       sex = '남여공학'
-    else :
+    else:
       log.debug('Unknown school type stored in db. school_sex=\"{}\", school_uid=\"{}\"'.format(school.sex,
-                                                                                                 school.school_id))
+                                                                                                school.school_id))
       raise HTTPException(status_code=500, detail='Database integrity')
 
     ret.append({
@@ -63,12 +65,13 @@ def get_school_list(school_name:str, db: Session):
 
   return ret
 
+
 def add_new_school(school: AddSchoolRequest, db: Session):
   exists_query = (
     db.query(School)
-      .filter_by(school_name=school.school_name)
-      .filter_by(neis_code=school.neis_code)
-      .exists()
+    .filter_by(school_name=school.school_name)
+    .filter_by(neis_code=school.neis_code)
+    .exists()
   )
   exists = db.query(exists_query).scalar()
 
@@ -111,6 +114,7 @@ def add_new_school(school: AddSchoolRequest, db: Session):
   db.add(ns)
   db.commit()
   log.debug('New school added. school_name=\"{}\"'.format(school.school_name))
+
 
 def delete_school(school_id: str, db: Session):
   school = db.query(School).filter_by(neis_code=school_id).first()

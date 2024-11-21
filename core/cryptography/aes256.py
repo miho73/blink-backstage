@@ -1,12 +1,13 @@
 import base64
 from secrets import token_bytes
+from typing import Optional
 
 from Crypto.Cipher import AES
 
 key = token_bytes(32)
 
 
-def encrypt(plain_text: str):
+def encrypt(plain_text: str) -> str:
   cipher = AES.new(key, AES.MODE_EAX)
   nonce = cipher.nonce
   ciphertext, tag = cipher.encrypt_and_digest(bytes(plain_text, 'utf-8'))
@@ -18,7 +19,7 @@ def encrypt(plain_text: str):
   return encrypted
 
 
-def decrypt(encrypted: str):
+def decrypt(encrypted: str) -> Optional[str]:
   [s_nonce, s_ciphertext, s_tag] = encrypted.split('!')
 
   nonce = base64.b64decode(s_nonce)

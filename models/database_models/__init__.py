@@ -1,3 +1,3 @@
 from .auth_lookup import AuthLookup
-from .google_method import GoogleMethod
+from .google_auth import GoogleMethod
 from .identity import Identity

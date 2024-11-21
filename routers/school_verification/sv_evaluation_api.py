@@ -5,17 +5,19 @@ from fastapi.params import Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.sv.sv import get_request_detail, get_evidence, determine_sv
 from database.database import create_connection
 from models.database_models.verification import SvEvidenceType
-from models.request_models.sv_determination import SvDetermination
+from models.request_models.school_verification_requests import SvEvaluation
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv/approve'
+  prefix='/api/sv/approve',
+  tags=['sv']
 )
+
 
 @router.get(
   path=''
@@ -50,6 +52,7 @@ def get_request_info(
       'data': detail
     }
   )
+
 
 @router.get(
   path='/evidence'
@@ -98,11 +101,12 @@ def view_evidence(
     }
   )
 
+
 @router.post(
   path=''
 )
 def determine(
-  body: SvDetermination,
+  body: SvEvaluation,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
@@ -119,4 +123,6 @@ def determine(
   determine_sv(body, db)
   db.commit()
 
-  log.debug('Determination of SV was made. verification_id=\"{}\", judge_uid=\"{}\", state=\"{}\"'.format(body.verification_id, sub, body.state))
+  log.debug(
+    'Determination of SV was made. verification_id=\"{}\", judge_uid=\"{}\", state=\"{}\"'.format(body.verification_id,
+                                                                                                  sub, body.state))

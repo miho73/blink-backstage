@@ -5,16 +5,18 @@ from fastapi.params import Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.school.school_access_service import get_school_list, add_new_school, delete_school
 from database.database import create_connection
-from models.request_models.school_request import AddSchoolRequest
+from models.request_models.school_requests import AddSchoolRequest
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/school/access'
+  prefix='/api/school/access',
+  tags=['school', 'access api']
 )
+
 
 @router.post(
   path=''
@@ -85,6 +87,7 @@ def get_list(
       'data': jsn
     }
   )
+
 
 @router.delete(
   path=''

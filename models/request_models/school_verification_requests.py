@@ -44,3 +44,30 @@ class NewVerificationRequest(BaseModel):
     if value is None:
       raise ValueError("reCAPTCHA token was not passed")
     return value
+
+
+class WithdrawVerificationRequest(BaseModel):
+  recaptcha: str
+
+  @field_validator("recaptcha", mode="before")
+  @classmethod
+  def validate_recaptcha(cls, value):
+    if value is None:
+      raise ValueError("reCAPTCHA token was not passed")
+    return value
+
+from pydantic import BaseModel, field_validator
+
+
+class SvEvaluation(BaseModel):
+  verification_id: int
+  state: int
+  school_id: int
+  grade: int
+
+  @field_validator("state", mode="before")
+  @classmethod
+  def validate_state(cls, value):
+    if value < 2 or value > 7:
+      raise ValueError("State must be one of 2, 3, 4, 5, 6, 7")
+    return value

@@ -3,19 +3,24 @@ from datetime import datetime
 from urllib import parse
 
 from fastapi import HTTPException
-from sqlalchemy import desc, asc
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
+from core.user.user_info import get_identity_by_userid
+from models.database_models import Identity
+from models.database_models.schools import School
 from models.database_models.verification import SvRequest, SvState
-from models.request_models.sv_determination import SvDetermination
+from models.request_models.school_verification_requests import WithdrawVerificationRequest
+from models.request_models.school_verification_requests import SvEvaluation
 
 log = logging.getLogger(__name__)
 
-def get_request_detail(vid: int, db: Session):
+
+def get_request_detail(vid: int, db: Session) -> dict:
   r = (
     db.query(SvRequest)
-      .filter_by(verification_id=vid)
-      .first()
+    .filter_by(verification_id=vid)
+    .first()
   )
 
   if r is None:
@@ -39,8 +44,8 @@ def get_request_detail(vid: int, db: Session):
   elif r.state is SvState.DENIED:
     state = 'DENIED'
   else:
-    log.debug('Unknown sv state stored in db. state=\"{}\", verification_uid=\"{}\"'.format(sv.state,
-                                                                                            sv.verification_id))
+    log.debug('Unknown sv state stored in db. state=\"{}\", verification_uid=\"{}\"'.format(r.state,
+                                                                                            r.verification_id))
     raise HTTPException(status_code=500, detail='Database integrity')
 
   return {
@@ -82,11 +87,12 @@ def get_request_list(user_id: int, db: Session) -> list[dict]:
 
   return ret
 
+
 def get_evidence(vid: int, db: Session):
   request = (
     db.query(SvRequest)
-      .filter_by(verification_id = vid)
-      .first()
+    .filter_by(verification_id=vid)
+    .first()
   )
 
   if request is None:
@@ -95,7 +101,8 @@ def get_evidence(vid: int, db: Session):
 
   return request.evidence_type, request.evidence
 
-def determine_sv(judge: SvDetermination, db: Session):
+
+def determine_sv(judge: SvEvaluation, db: Session):
   sv = (
     db.query(SvRequest)
     .filter_by(verification_id=judge.verification_id)
@@ -110,4 +117,26 @@ def determine_sv(judge: SvDetermination, db: Session):
   sv.examine_time = datetime.now()
   if judge.state is SvState.ACCEPTED.value:
     sv.identity.school_id = judge.school_id
+    sv.identity.grade = judge.grade
     sv.identity.student_verified = True
+
+    school = (
+      db.query(School)
+      .filter_by(school_id=judge.school_id)
+      .first()
+    )
+
+    school.user_count = school.user_count + 1
+
+
+def withdraw_verification_sub(sub: int, req: WithdrawVerificationRequest, db: Session):
+  identity: Identity = get_identity_by_userid(sub, db)
+
+  if identity.school is None:
+    log.debug('User is not verified. user_uid=\"{}\"'.format(sub))
+    raise HTTPException(status_code=400, detail="User not verified")
+
+  identity.school.user_count = identity.school.user_count - 1
+  identity.school_id = None
+  identity.grade = None
+  identity.student_verified = False

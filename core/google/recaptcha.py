@@ -11,7 +11,7 @@ location = "us-central1"
 log = logging.getLogger(__name__)
 
 
-def verify_recaptcha(token: str, client_ip: str, action: str):
+def verify_recaptcha(token: str, client_ip: str, action: str) -> bool:
   client = recaptchaenterprise_v1.RecaptchaEnterpriseServiceClient()
 
   log.debug("Assessing reCAPTCHA. token=\"{}\", client_ip=\"{}\", action=\"{}\"".format(token, client_ip, action))

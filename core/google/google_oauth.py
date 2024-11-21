@@ -32,7 +32,7 @@ def start_authentication():
   return authorization_url, state
 
 
-def get_access_token(code: str):
+def get_access_token(code: str) -> str:
   return flow.fetch_token(code=code)['access_token']
 
 
@@ -71,7 +71,7 @@ def get_google_id(access_token: str) -> str:
   return profile['sub']
 
 
-def complete_authentication(identity: Identity):
+def complete_authentication(identity: Identity) -> str:
   log.debug("Completing authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
   identity.last_login = datetime.now()
   identity.auth_lookup.google_method.last_used = datetime.now()

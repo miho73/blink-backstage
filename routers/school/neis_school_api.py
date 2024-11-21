@@ -3,13 +3,14 @@ import logging
 from fastapi import APIRouter, Security, HTTPException, Request
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
-from core.school.neis_school import query_school_info
+from core.authentication.authorization_service import authorization_header, authorize_jwt
+from core.school.neis_school_service import query_school_info
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/school/neis'
+  prefix='/api/school/neis',
+  tags=['school', 'neis']
 )
 
 

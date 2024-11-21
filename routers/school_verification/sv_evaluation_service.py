@@ -5,7 +5,7 @@ from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.authorization import authorization_header, authorize_jwt
+from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.google.recaptcha import verify_recaptcha
 from core.sv.sv import get_request_list
 from database.database import create_connection
@@ -14,12 +14,13 @@ from models.database_models.verification import SvRequest
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv'
+  prefix='/api/sv',
+  tags=['sv']
 )
 
 
 @router.get(
-  path='/request'
+  path='/request',
 )
 def get_verification_requests(
   jwt: str = Security(authorization_header),

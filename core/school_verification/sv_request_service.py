@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from core.user import user_info
 from models.database_models import Identity
 from models.database_models.verification import SvRequest, SvRequestType, SvState, SvEvidenceType
-from models.request_models.school_verification_request import NewVerificationRequest
+from models.request_models.school_verification_requests import NewVerificationRequest
 
 log = logging.getLogger(__name__)
 

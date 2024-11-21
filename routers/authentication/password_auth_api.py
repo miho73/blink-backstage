@@ -5,17 +5,17 @@ from fastapi.params import Depends, Security
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
-from core.authentication.auth_lookup_service import find_identity, OAuthMethods
-from core.authentication.authorization import authorization_header, authorize_jwt
-from core.authentication.password_authentication import password_authentication, change_password
+from core.authentication.auth_lookup_service import find_identity_from_auth_id, OAuthMethods
+from core.authentication.authorization_service import authorization_header, authorize_jwt
+from core.authentication.password_auth_service import auth_with_password, change_password
 from core.google.recaptcha import verify_recaptcha
 from core.user import user_info
 from core.user.add_user import add_password_user
 from database.database import create_connection
 from models.database_models import Identity
-from models.request_models.signin_models import PasswordSigninRequest
-from models.request_models.password_request import UpdatePasswordRequest
-from models.request_models.register_request import PasswordRegisterRequest
+from models.request_models.password_requests import UpdatePasswordRequest
+from models.request_models.register_requests import PasswordRegisterRequest
+from models.request_models.signin_requests import PasswordSigninRequest
 
 log = logging.getLogger(__name__)
 
@@ -41,12 +41,12 @@ def sign_in_password_user(
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   # signin
-  identity = find_identity(body.id, OAuthMethods.PASSWORD, db)
+  identity = find_identity_from_auth_id(body.id, OAuthMethods.PASSWORD, db)
   if identity is None:
     log.debug("Identity not found. Signin was failed id=\"{}\"".format(body.id))
     raise HTTPException(status_code=401, detail="Bad credential")
 
-  jwt = password_authentication(identity, body.password)
+  jwt = auth_with_password(identity, body.password)
   db.commit()
   if jwt is None:
     log.debug("Password authentication failed. id=\"{}\"".format(body.id))
