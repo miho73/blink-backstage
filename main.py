@@ -6,7 +6,7 @@ from routers.authentication import google_auth_api, authorization_api, password_
 from routers.error_handler import add_error_handler
 from routers.school import school_access_api, neis_school_api
 from routers.school_verification import sv_user_api, sv_request_api, sv_access_api, sv_evaluation_api, \
-  sv_evaluation_service
+  sv_user_request_api
 from routers.user import user_info_api
 
 app = FastAPI(
@@ -30,7 +30,7 @@ app.include_router(sv_user_api.router)
 app.include_router(sv_request_api.router)
 app.include_router(sv_access_api.router)
 app.include_router(sv_evaluation_api.router)
-app.include_router(sv_evaluation_service.router)
+app.include_router(sv_user_request_api.router)
 ####################################################
 app.include_router(school_access_api.router)
 app.include_router(neis_school_api.router)

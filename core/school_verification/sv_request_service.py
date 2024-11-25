@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 def add_new_request(sub: int, req: NewVerificationRequest, db: Session):
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
 
   if identity is None:
     log.debug('Identity specified by JWT was not found and request was not made. user_uid=\"{}\"'.format(sub))

@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 router = APIRouter(
   prefix="/api/auth/google",
-  tags=["google", "authentication"]
+  tags=["google-authentication", "authentication"]
 )
 
 

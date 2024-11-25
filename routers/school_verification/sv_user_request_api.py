@@ -14,13 +14,13 @@ from models.database_models.verification import SvRequest
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv',
+  prefix='/api/sv/user',
   tags=['sv']
 )
 
 
 @router.get(
-  path='/request',
+  path='/requests',
 )
 def get_verification_requests(
   jwt: str = Security(authorization_header),
@@ -43,7 +43,7 @@ def get_verification_requests(
 
 
 @router.delete(
-  path='/request'
+  path='/requests'
 )
 def delete_request(
   request: Request,

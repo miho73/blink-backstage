@@ -21,41 +21,6 @@ router = APIRouter(
 )
 
 
-@router.get(
-  path='/get',
-  tags=['user']
-)
-def get_verification_info(
-  auth: str = Security(authorization_header),
-  db: Session = Depends(create_connection)
-):
-  log.debug("Getting school school_verification data upon JWT. jwt=\"{}\"".format(auth))
-
-  token = authorize_jwt(auth)
-  sub = token.get("sub")
-
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
-  if identity is None:
-    log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
-    raise HTTPException(status_code=400, detail="Identity not found")
-
-  if identity.student_verified:
-    school = {
-      "name": identity.school.school_name,
-      "id": identity.school.school_id,
-      "grade": identity.grade
-    }
-  else:
-    school = None
-
-  return JSONResponse(
-    content={
-      'verified': identity.student_verified,
-      'school': school
-    }
-  )
-
-
 @router.post(
   path='/withdraw'
 )

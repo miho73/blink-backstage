@@ -77,4 +77,4 @@ def complete_authentication(identity: Identity) -> str:
   identity.auth_lookup.google_method.last_used = datetime.now()
 
   log.debug("Issued JWT. user_id=\"{user_id}\", role=\"{role}\"".format(user_id=identity.user_id, role=identity.role))
-  return jwt.create_token(identity.user_id, identity.role)
+  return jwt_service.create_token(identity.user_id, identity.role)

@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Security, Depends, HTTPException
+from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
@@ -18,7 +19,7 @@ router = APIRouter(
 
 
 @router.get(
-  path='/get'
+  path=''
 )
 def get_user(
   auth: str = Security(authorization_header),
@@ -29,7 +30,7 @@ def get_user(
 
   sub = token.get("sub")
 
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
     log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=400, detail="Identity not found")
@@ -53,7 +54,7 @@ def get_user(
 
 
 @router.get(
-  path='/auth/get',
+  path='/auth',
   tags=['authentication']
 )
 def get_auth_lookup(
@@ -65,7 +66,7 @@ def get_auth_lookup(
 
   sub = token.get("sub")
 
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
     log.debug('Identity was not found and auth lookup was not returned. user_uid=\"{}\"'.format(sub))
     raise HTTPException(status_code=400, detail="Identity not found")
@@ -98,5 +99,38 @@ def get_auth_lookup(
         "google": google_auth,
         "password": password_auth
       }
+    }
+  )
+
+@router.get(
+  path='/sv',
+)
+def get_verification_info(
+  auth: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.debug("Getting school school_verification data upon JWT. jwt=\"{}\"".format(auth))
+
+  token = authorize_jwt(auth)
+  sub = token.get("sub")
+
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
+  if identity is None:
+    log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
+    raise HTTPException(status_code=400, detail="Identity not found")
+
+  if identity.student_verified:
+    school = {
+      "name": identity.school.school_name,
+      "id": identity.school.school_id,
+      "grade": identity.grade
+    }
+  else:
+    school = None
+
+  return JSONResponse(
+    content={
+      'verified': identity.student_verified,
+      'school': school
     }
   )

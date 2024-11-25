@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get(
-  path='/query'
+  path=''
 )
 def query_neis_school(
   request: Request,

@@ -21,7 +21,7 @@ def auth_with_password(identity: Identity, password: str) -> Optional[str]:
     identity.auth_lookup.password_method.last_used = datetime.now()
 
     log.debug("Issued JWT. user_id=\"{user_id}\", role=\"{role}\"".format(user_id=identity.user_id, role=identity.role))
-    return jwt.create_token(identity.user_id, identity.role)
+    return jwt_service.create_token(identity.user_id, identity.role)
 
   else:
     log.debug("Password authentication failed. id=\"{}\"".format(identity.user_id))

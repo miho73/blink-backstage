@@ -14,13 +14,13 @@ from models.request_models.school_verification_requests import SvEvaluation
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv/approve',
+  prefix='/api/sv/evaluation',
   tags=['sv']
 )
 
 
 @router.get(
-  path=''
+  path='/request'
 )
 def get_request_info(
   request: Request,
@@ -102,7 +102,7 @@ def view_evidence(
   )
 
 
-@router.post(
+@router.patch(
   path=''
 )
 def determine(

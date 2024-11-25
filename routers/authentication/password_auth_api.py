@@ -21,12 +21,12 @@ log = logging.getLogger(__name__)
 
 router = APIRouter(
   prefix='/api/auth/password',
-  tags=['password']
+  tags=["password-authentication", "authentication"]
 )
 
 
 @router.post(
-  path='/signin'
+  path='/login'
 )
 def sign_in_password_user(
   body: PasswordSigninRequest,
@@ -110,7 +110,7 @@ def update_password(
   token = authorize_jwt(auth)
   sub = token.get("sub")
 
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
     log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=400, detail="Identity not found")

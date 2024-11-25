@@ -16,7 +16,7 @@ from models.request_models.school_verification_requests import NewVerificationRe
 log = logging.getLogger(__name__)
 
 router = APIRouter(
-  prefix='/api/sv/clearance',
+  prefix='/api/sv',
   tags=['sv']
 )
 
@@ -64,7 +64,7 @@ async def upload_evidence(
   token = authorize_jwt(jwt)
   sub = token.get("sub")
 
-  identity: Identity = user_info.get_identity_by_userid(sub, db)
+  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
     log.debug('Identity specified by JWT was not found and evidence was not uploaded. user_uid=\"{}\"'.format(sub))
     raise HTTPException(status_code=400, detail='Identity not found')

@@ -32,7 +32,7 @@ def authorize_jwt(token: str) -> dict:
     raise HTTPException(status_code=400, detail="JWT token is missing")
 
   try:
-    jwt_body = jwt.decode(jwt_token)
+    jwt_body = jwt_service.decode(jwt_token)
   except (InvalidTokenError, Exception) as e:
     log.debug("Auth failed: JWT is invalid or unauthorized[{}]".format(e))
     raise HTTPException(status_code=401, detail="JWT is invalid or unauthorized")
