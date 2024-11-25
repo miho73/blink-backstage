@@ -66,7 +66,7 @@ def get_school_list(school_name: str, db: Session) -> list[dict]:
   return ret
 
 
-def add_new_school(school: AddSchoolRequest, db: Session):
+def add_school(school: AddSchoolRequest, db: Session):
   exists_query = (
     db.query(School)
     .filter_by(school_name=school.school_name)

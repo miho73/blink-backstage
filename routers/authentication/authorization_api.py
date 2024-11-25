@@ -14,9 +14,10 @@ router = APIRouter(
 
 
 @router.post(
-  path=''
+  path='',
+  summary='Authorize user with JWT token',
 )
-def authorize(
+def authorize_api(
   auth: str = Security(authorization_header)
 ):
   log.debug("Authorizing user with JWT token. jwt: {token}".format(token=auth))

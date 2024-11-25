@@ -7,11 +7,11 @@ from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.google.recaptcha_service import verify_recaptcha
-from core.school_verification.sv_request_service import add_new_request, insert_evidence
+from core.school_verification.sv_request_service import add_request, add_evidence
 from core.user import user_info_service
 from database.database import create_connection
 from models.database_models import Identity
-from models.request_models.school_verification_requests import NewVerificationRequest
+from models.request_models.school_verification_requests import NewVerificationRequest, WithdrawVerificationRequest
 
 log = logging.getLogger(__name__)
 
@@ -22,9 +22,10 @@ router = APIRouter(
 
 
 @router.post(
-  path='/draft'
+  path='/draft',
+  summary='Submit a new SV draft'
 )
-def submit_verification_request(
+def submit_sv_draft_api(
   body: NewVerificationRequest,
   request: Request,
   jwt: str = Security(authorization_header),
@@ -39,7 +40,7 @@ def submit_verification_request(
   token = authorize_jwt(jwt)
   sub = token.get("sub")
 
-  add_new_request(sub, body, db)
+  add_request(sub, body, db)
   db.commit()
   log.debug("New verification request draft was saved. user_uid=\"{}\"".format(sub))
   return JSONResponse(
@@ -52,9 +53,10 @@ def submit_verification_request(
 
 
 @router.post(
-  path='/evidence'
+  path='/evidence',
+  summary='Upload evidence for an SV request'
 )
-async def upload_evidence(
+async def upload_sv_evidence_api(
   evidence: UploadFile,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
@@ -69,7 +71,7 @@ async def upload_evidence(
     log.debug('Identity specified by JWT was not found and evidence was not uploaded. user_uid=\"{}\"'.format(sub))
     raise HTTPException(status_code=400, detail='Identity not found')
 
-  await insert_evidence(evidence, identity, db)
+  await add_evidence(evidence, identity, db)
 
   return JSONResponse(
     content={

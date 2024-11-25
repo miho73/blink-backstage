@@ -16,7 +16,7 @@ from models.request_models.school_verification_requests import SvEvaluation
 log = logging.getLogger(__name__)
 
 
-def get_request_detail(vid: int, db: Session) -> dict:
+def get_sv_request_detail(vid: int, db: Session) -> dict:
   r = (
     db.query(SvRequest)
     .filter_by(verification_id=vid)
@@ -102,7 +102,7 @@ def get_evidence(vid: int, db: Session):
   return request.evidence_type, request.evidence
 
 
-def determine_sv(judge: SvEvaluation, db: Session):
+def evaluate_sv(judge: SvEvaluation, db: Session):
   sv = (
     db.query(SvRequest)
     .filter_by(verification_id=judge.verification_id)
@@ -129,7 +129,7 @@ def determine_sv(judge: SvEvaluation, db: Session):
     school.user_count = school.user_count + 1
 
 
-def withdraw_verification_sub(sub: int, req: WithdrawVerificationRequest, db: Session):
+def withdraw_verification(sub: int, db: Session):
   identity: Identity = get_identity_by_userid(sub, db)
 
   if identity.school is None:

@@ -57,7 +57,7 @@ def get_google_user(access_token: str) -> GoogleUser:
   return google_user
 
 
-def get_google_id(access_token: str) -> str:
+def get_google_sub(access_token: str) -> str:
   response = requests.get("https://www.googleapis.com/oauth2/v3/userinfo", params={"access_token": access_token})
   if response.status_code != 200:
     log.error(
@@ -71,8 +71,8 @@ def get_google_id(access_token: str) -> str:
   return profile['sub']
 
 
-def complete_authentication(identity: Identity) -> str:
-  log.debug("Completing authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
+def complete_google_authentication(identity: Identity) -> str:
+  log.debug("Completing google authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
   identity.last_login = datetime.now()
   identity.auth_lookup.google_method.last_used = datetime.now()
 

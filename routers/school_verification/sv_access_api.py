@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.sv.sv_access_service import access_get_sv
+from core.school_verification.sv_access_service import access_get_sv
 from database.database import create_connection
 
 log = logging.getLogger(__name__)
@@ -18,7 +18,8 @@ router = APIRouter(
 
 
 @router.get(
-  path=''
+  path='',
+  summary='Get school verification list that satisfy the conditions',
 )
 def get_sv_list(
   request: Request,

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.school.school_access_service import get_school_list, add_new_school, delete_school
+from core.school.school_access_service import get_school_list, add_school, delete_school, add_school
 from database.database import create_connection
 from models.request_models.school_requests import AddSchoolRequest
 
@@ -19,9 +19,10 @@ router = APIRouter(
 
 
 @router.post(
-  path=''
+  path='',
+  summary='Add a new school to the database'
 )
-def add_school(
+def add_school_api(
   body: AddSchoolRequest,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
@@ -34,7 +35,7 @@ def add_school(
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
 
-  add_new_school(body, db)
+  add_school(body, db)
 
   return JSONResponse(
     status_code=201,
@@ -46,9 +47,10 @@ def add_school(
 
 
 @router.get(
-  path=''
+  path='',
+  summary='Get a list of schools from the database that satisfy the given conditions'
 )
-def get_list(
+def get_school_list_api(
   request: Request,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
@@ -90,9 +92,10 @@ def get_list(
 
 
 @router.delete(
-  path=''
+  path='',
+  summary="Delete a school from the database"
 )
-def delete_db_school(
+def deletes_school_api(
   request: Request,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)

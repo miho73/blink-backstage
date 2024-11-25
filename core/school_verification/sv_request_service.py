@@ -12,7 +12,7 @@ from models.request_models.school_verification_requests import NewVerificationRe
 log = logging.getLogger(__name__)
 
 
-def add_new_request(sub: int, req: NewVerificationRequest, db: Session):
+def add_request(sub: int, req: NewVerificationRequest, db: Session):
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
 
   if identity is None:
@@ -60,7 +60,7 @@ def add_new_request(sub: int, req: NewVerificationRequest, db: Session):
   db.commit()
 
 
-async def insert_evidence(file: UploadFile, identity: Identity, db: Session):
+async def add_evidence(file: UploadFile, identity: Identity, db: Session):
   log.debug(
     "Evidence was uploaded. user_uid=\"{}\" size=\"{}\" content_type\"{}\" filename=\"{}\""
     .format(identity.user_id, file.size, file.content_type, file.filename)

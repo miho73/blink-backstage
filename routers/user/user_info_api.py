@@ -19,9 +19,10 @@ router = APIRouter(
 
 
 @router.get(
-  path=''
+  path='',
+  summary="Get user information",
 )
-def get_user(
+def get_user_api(
   auth: str = Security(authorization_header),
   db=Depends(create_connection)
 ):
@@ -55,9 +56,10 @@ def get_user(
 
 @router.get(
   path='/auth',
-  tags=['authentication']
+  tags=['authentication'],
+  summary="Get user authentication information",
 )
-def get_auth_lookup(
+def get_auth_lookup_api(
   auth: str = Security(authorization_header),
   db=Depends(create_connection)
 ):
@@ -104,8 +106,10 @@ def get_auth_lookup(
 
 @router.get(
   path='/sv',
+  tags=['sv'],
+  summary="Get school verification information",
 )
-def get_verification_info(
+def get_verification_info_api(
   auth: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):

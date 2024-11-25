@@ -7,7 +7,7 @@ from starlette.responses import JSONResponse
 
 from core.authentication.auth_lookup_service import find_identity_from_auth_id, OAuthMethods
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.authentication.password_auth_service import auth_with_password, change_password
+from core.authentication.password_auth_service import login_with_password, update_password
 from core.google.recaptcha_service import verify_recaptcha
 from core.user import user_info_service
 from core.user.add_user_service import add_password_user
@@ -26,9 +26,10 @@ router = APIRouter(
 
 
 @router.post(
-  path='/login'
+  path='/login',
+  summary="Sign in with password and issue JWT"
 )
-def sign_in_password_user(
+def password_signin_api(
   body: PasswordSigninRequest,
   request: Request,
   db: Session = Depends(create_connection)
@@ -46,7 +47,7 @@ def sign_in_password_user(
     log.debug("Identity not found. Signin was failed id=\"{}\"".format(body.id))
     raise HTTPException(status_code=401, detail="Bad credential")
 
-  jwt = auth_with_password(identity, body.password)
+  jwt = login_with_password(identity, body.password)
   db.commit()
   if jwt is None:
     log.debug("Password authentication failed. id=\"{}\"".format(body.id))
@@ -64,9 +65,10 @@ def sign_in_password_user(
 
 
 @router.post(
-  path='/register'
+  path='/register',
+  summary="Register new password user"
 )
-def register_password_user(
+def register_password_user_api(
   body: PasswordRegisterRequest,
   request: Request,
   db: Session = Depends(create_connection)
@@ -93,9 +95,10 @@ def register_password_user(
 
 
 @router.patch(
-  path='/update'
+  path='/update',
+  summary="Update password of the user"
 )
-def update_password(
+def update_user_password_api(
   body: UpdatePasswordRequest,
   request: Request,
   auth: str = Security(authorization_header),
@@ -115,7 +118,7 @@ def update_password(
     log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=400, detail="Identity not found")
 
-  change_password(identity, body.current_password, body.new_password)
+  update_password(identity, body.current_password, body.new_password)
   db.commit()
 
   return JSONResponse(

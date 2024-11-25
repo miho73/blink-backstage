@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.sv.sv import get_request_detail, get_evidence, determine_sv
+from core.school_verification.sv import get_sv_request_detail, get_evidence, evaluate_sv
 from database.database import create_connection
 from models.database_models.verification import SvEvidenceType
 from models.request_models.school_verification_requests import SvEvaluation
+from routers.school_verification.sv_access_api import get_sv_list
 
 log = logging.getLogger(__name__)
 
@@ -20,9 +21,10 @@ router = APIRouter(
 
 
 @router.get(
-  path='/request'
+  path='/request',
+  summary="Get SV request info for evaluation purpose"
 )
-def get_request_info(
+def get_sv_request_api(
   request: Request,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
@@ -43,7 +45,7 @@ def get_request_info(
     log.debug('Verification id was not given.')
     raise HTTPException(status_code=400, detail='vid was not given')
 
-  detail = get_request_detail(int(vid), db)
+  detail = get_sv_request_detail(int(vid), db)
 
   return JSONResponse(
     content={
@@ -55,9 +57,10 @@ def get_request_info(
 
 
 @router.get(
-  path='/evidence'
+  path='/evidence',
+  summary="Get SV request evidence for evaluation purpose"
 )
-def view_evidence(
+def get_evidence_api(
   request: Request,
   db: Session = Depends(create_connection)
 ):
@@ -103,14 +106,15 @@ def view_evidence(
 
 
 @router.patch(
-  path=''
+  path='',
+  summary="Evaluate SV request"
 )
-def determine(
+def evaluate_sv_api(
   body: SvEvaluation,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug('Judge SV request using JWT. jwt=\"{}\"'.format(jwt))
+  log.debug('Evaluate SV request using JWT. jwt=\"{}\"'.format(jwt))
 
   token = authorize_jwt(jwt)
   sub = token.get('sub')
@@ -120,9 +124,9 @@ def determine(
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
-  determine_sv(body, db)
+  evaluate_sv(body, db)
   db.commit()
 
   log.debug(
-    'Determination of SV was made. verification_id=\"{}\", judge_uid=\"{}\", state=\"{}\"'.format(body.verification_id,
+    'Evaluation of SV was made. verification_id=\"{}\", judge_uid=\"{}\", state=\"{}\"'.format(body.verification_id,
                                                                                                   sub, body.state))

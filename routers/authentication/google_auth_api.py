@@ -7,7 +7,7 @@ from starlette.responses import RedirectResponse, JSONResponse
 from core.authentication.auth_lookup_service import OAuthMethods, find_identity_from_auth_id
 from core.config import config
 from core.cryptography import aes256
-from core.google.google_oauth_service import start_authentication, complete_authentication, get_google_id, \
+from core.google.google_oauth_service import start_authentication, complete_google_authentication, get_google_sub, \
   get_access_token
 from core.google.recaptcha_service import verify_recaptcha
 from core.user.add_user_service import add_google_user
@@ -23,9 +23,10 @@ router = APIRouter(
 
 
 @router.get(
-  path="/login"
+  path="/login",
+  summary="Redirect request to Google OAuth2 signin",
 )
-def start_google_login():
+def start_google_login_api():
   log.info("Redirecting to Google OAuth signin")
   auth_url, state = start_authentication()
 
@@ -47,9 +48,10 @@ def start_google_login():
 
 
 @router.get(
-  path="/callback"
+  path="/callback",
+  summary="Callback for Google OAuth2 signin",
 )
-def callback_google_login(
+def google_login_callback_api(
   request: Request,
   db: Session = Depends(create_connection)
 ):
@@ -76,7 +78,7 @@ def callback_google_login(
   # check if user exists in google methods
   code = request.query_params.get("code")
   access_token = get_access_token(code)
-  google_id: str = get_google_id(access_token)
+  google_id: str = get_google_sub(access_token)
   identity = find_identity_from_auth_id(google_id, OAuthMethods.GOOGLE, db)
 
   if identity is None:
@@ -86,7 +88,7 @@ def callback_google_login(
 
   else:
     log.info("User exists in Google Methods. Redirecting to login. google_id=\"{}\"".format(google_id))
-    jwt = complete_authentication(identity)
+    jwt = complete_google_authentication(identity)
     db.commit()
     response = RedirectResponse("/auth/complete?jwt={jwt}".format(jwt=jwt), 302)
     response.delete_cookie("with-state")
@@ -94,9 +96,10 @@ def callback_google_login(
 
 
 @router.post(
-  path="/register"
+  path="/register",
+  summary="Register new Google user",
 )
-def register_google_user(
+def register_google_user_api(
   body: GoogleRegisterRequest,
   request: Request,
   db: Session = Depends(create_connection)
