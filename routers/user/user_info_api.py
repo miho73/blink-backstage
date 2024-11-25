@@ -4,7 +4,7 @@ from fastapi import APIRouter, Security, Depends, HTTPException
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.user import user_info
+from core.user import user_info_service
 from database.database import create_connection
 from models.database_models import Identity, GoogleMethod, AuthLookup
 from models.database_models.password_auth import PasswordMethod

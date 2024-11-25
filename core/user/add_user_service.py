@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from core.cryptography.bcrypt import hash_bcrypt
-from core.google.google_oauth import get_google_user
+from core.google.google_oauth_service import get_google_user
 from core.validation import validate_all, length_check, regex_check, assert_value
 from models.database_models import GoogleMethod, Identity, AuthLookup
 from models.database_models.password_auth import PasswordMethod

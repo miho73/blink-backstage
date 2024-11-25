@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from core.user.user_info import get_identity_by_userid
+from core.user.user_info_service import get_identity_by_userid
 from models.database_models import Identity
 from models.database_models.schools import School
 from models.database_models.verification import SvRequest, SvState

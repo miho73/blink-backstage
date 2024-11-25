@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from fastapi.security import APIKeyHeader
 from jwt import InvalidTokenError
 
-from core.jwt import jwt
+from core.jwt import jwt_service
 
 log = logging.getLogger(__name__)
 

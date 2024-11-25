@@ -7,10 +7,10 @@ from starlette.responses import RedirectResponse, JSONResponse
 from core.authentication.auth_lookup_service import OAuthMethods, find_identity_from_auth_id
 from core.config import config
 from core.cryptography import aes256
-from core.google.google_oauth import start_authentication, complete_authentication, get_google_id, \
+from core.google.google_oauth_service import start_authentication, complete_authentication, get_google_id, \
   get_access_token
-from core.google.recaptcha import verify_recaptcha
-from core.user.add_user import add_google_user
+from core.google.recaptcha_service import verify_recaptcha
+from core.user.add_user_service import add_google_user
 from database.database import create_connection
 from models.request_models.register_requests import GoogleRegisterRequest
 

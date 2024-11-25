@@ -8,9 +8,9 @@ from starlette.responses import JSONResponse
 from core.authentication.auth_lookup_service import find_identity_from_auth_id, OAuthMethods
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.authentication.password_auth_service import auth_with_password, change_password
-from core.google.recaptcha import verify_recaptcha
-from core.user import user_info
-from core.user.add_user import add_password_user
+from core.google.recaptcha_service import verify_recaptcha
+from core.user import user_info_service
+from core.user.add_user_service import add_password_user
 from database.database import create_connection
 from models.database_models import Identity
 from models.request_models.password_requests import UpdatePasswordRequest

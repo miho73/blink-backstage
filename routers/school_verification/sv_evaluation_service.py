@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.google.recaptcha import verify_recaptcha
+from core.google.recaptcha_service import verify_recaptcha
 from core.sv.sv import get_request_list
 from database.database import create_connection
 from models.database_models.verification import SvRequest

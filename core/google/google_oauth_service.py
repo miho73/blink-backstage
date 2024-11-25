@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from google_auth_oauthlib.flow import Flow
 
 from core.config import config
-from core.jwt import jwt
+from core.jwt import jwt_service
 from models.database_models.identity import Identity
 from models.user import GoogleUser
 

@@ -4,7 +4,7 @@ from fastapi import HTTPException, UploadFile
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from core.user import user_info
+from core.user import user_info_service
 from models.database_models import Identity
 from models.database_models.verification import SvRequest, SvRequestType, SvState, SvEvidenceType
 from models.request_models.school_verification_requests import NewVerificationRequest

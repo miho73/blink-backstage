@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import HTTPException
 
 from core.cryptography import bcrypt
-from core.jwt import jwt
+from core.jwt import jwt_service
 from models.database_models import Identity
 from models.database_models.password_auth import PasswordMethod
 
