@@ -1,7 +1,6 @@
 import logging
 
 from fastapi import HTTPException, UploadFile
-from pyasn1_modules.rfc2985 import contentType
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
@@ -70,7 +69,7 @@ async def insert_evidence(file: UploadFile, identity: Identity, db: Session):
   content_type = file.content_type
   if content_type == 'application/pdf':
     file_type = SvEvidenceType.PDF
-  elif contentType == 'image/png':
+  elif content_type == 'image/png':
     file_type = SvEvidenceType.PNG
   elif content_type == 'image/jpeg':
     file_type = SvEvidenceType.JPEG

@@ -2,7 +2,7 @@ import base64
 from secrets import token_bytes
 from typing import Optional
 
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 key = token_bytes(32)
 

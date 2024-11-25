@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 import jwt
 from jwt import InvalidTokenError
@@ -17,7 +18,7 @@ KST = timezone(timedelta(hours=9))
 def create_token(user_id: int, role: Role) -> str:
   payload = {
     'aud': DB_ROLE_CODE_TO_ROLE[role],
-    'sub': user_id,
+    'sub': str(user_id),
     'exp': datetime.now(KST) + timedelta(weeks=5),
     'iat': datetime.now(KST),
     'iss': 'blink',
@@ -74,3 +75,9 @@ def validate_authentication(token: str) -> bool:
     return False
 
   return True
+
+def get_sub(token: dict) -> Optional[int]:
+  sub = token.get('sub')
+  if sub is None:
+    return None
+  return int(sub)

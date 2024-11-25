@@ -20,7 +20,7 @@ def add_google_user(request: GoogleRegisterRequest, db: Session):
   # form validation
   if validate_all(
     length_check(google_user.email, 5, 255),
-    regex_check(google_user.email, r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'),
+    regex_check(google_user.email, r'^[-\w.]+@([\w-]+\.)+[\w-]{2,4}$'),
     assert_value(google_user.email_verified, True),
   ):
     log.debug("Form validation failed")
