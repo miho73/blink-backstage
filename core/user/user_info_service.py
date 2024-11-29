@@ -4,7 +4,7 @@ from typing import Type
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from models.database_models import Identity
+from models.database_models.relational.identity import Identity
 from models.request_models.user_requests import UpdateUserProfileRequest
 
 log = logging.getLogger(__name__)
@@ -30,7 +30,8 @@ def update_user_profile(uid: int, request: UpdateUserProfileRequest, db: Session
       .first()
   )
 
-  if current_identity.email is not request.email:
+  if current_identity.email != request.email:
+    log.debug('Email was changed. email verification set to false. user_uid="{}", email="{}"'.format(uid, request.email))
     current_identity.email_verified = False
     current_identity.email = request.email
 

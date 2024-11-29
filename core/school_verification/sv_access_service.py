@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
-from models.database_models.verification import SvRequest, SvState
+from models.database_models.relational.verification import SvRequest, SvState
 
 log = logging.getLogger(__name__)
 

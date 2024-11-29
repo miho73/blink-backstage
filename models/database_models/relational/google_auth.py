@@ -7,8 +7,8 @@ from sqlalchemy.orm import relationship
 from database.database import TableBase
 
 
-class GoogleMethod(TableBase):
-  __tablename__ = "google_method"
+class GoogleAuth(TableBase):
+  __tablename__ = "google_auth"
   __table_args__ = {"schema": "authentication"}
 
   google_auth_id: int = Column(INTEGER, primary_key=True, index=True, unique=True, nullable=False, autoincrement=True)
@@ -17,4 +17,4 @@ class GoogleMethod(TableBase):
 
   last_used: datetime = Column(TIMESTAMP)
 
-  auth_lookup = relationship("AuthLookup", back_populates="google_method")
+  auth_lookup = relationship("AuthLookup", back_populates="google_auth")

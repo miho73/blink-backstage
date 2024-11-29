@@ -1,11 +1,11 @@
 import re
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, EmailStr
 
 
 class PasswordRegisterRequest(BaseModel):
   username: str
-  email: str
+  email: EmailStr
   id: str
   password: str
   recaptcha: str

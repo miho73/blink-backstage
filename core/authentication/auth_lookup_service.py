@@ -3,9 +3,9 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from models.database_models.google_auth import GoogleMethod
-from models.database_models.identity import Identity
-from models.database_models.password_auth import PasswordMethod
+from models.database_models.relational.google_auth import GoogleAuth
+from models.database_models.relational.identity import Identity
+from models.database_models.relational.password_auth import PasswordAuth
 
 class OAuthMethods(Enum):
   GOOGLE = "google"
@@ -15,7 +15,7 @@ class OAuthMethods(Enum):
 
 def find_identity_from_auth_id(identifier: str, provider: OAuthMethods, db: Session) -> Optional[Identity]:
   if provider == OAuthMethods.GOOGLE:
-    google_auth = db.query(GoogleMethod).filter(GoogleMethod.google_id == identifier).first()
+    google_auth = db.query(GoogleAuth).filter(GoogleAuth.google_id == identifier).first()
 
     if google_auth is None:
       return None
@@ -23,7 +23,7 @@ def find_identity_from_auth_id(identifier: str, provider: OAuthMethods, db: Sess
     return google_auth.auth_lookup.identity
 
   elif provider == OAuthMethods.PASSWORD:
-    password_auth = db.query(PasswordMethod).filter(PasswordMethod.user_id == identifier).first()
+    password_auth = db.query(PasswordAuth).filter(PasswordAuth.user_id == identifier).first()
 
     if password_auth is None:
       return None

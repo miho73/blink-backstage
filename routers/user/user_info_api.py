@@ -9,8 +9,10 @@ from core.google.recaptcha_service import verify_recaptcha
 from core.user import user_info_service
 from core.user.user_info_service import update_user_profile
 from database.database import create_connection
-from models.database_models import Identity, GoogleMethod, AuthLookup
-from models.database_models.password_auth import PasswordMethod
+from models.database_models.relational.auth_lookup import AuthLookup
+from models.database_models.relational.google_auth import GoogleAuth
+from models.database_models.relational.identity import Identity
+from models.database_models.relational.password_auth import PasswordAuth
 from models.request_models.user_requests import UpdateUserProfileRequest
 
 log = logging.getLogger(__name__)
@@ -82,12 +84,12 @@ def get_auth_lookup_api(
   password_auth = None
 
   if auth_lookup.google:
-    google_method: GoogleMethod = auth_lookup.google_method
+    google_auth: GoogleAuth = auth_lookup.google_auth
     google_auth = {
-      "last_used": google_method.last_used.isoformat()
+      "last_used": google_auth.last_used.isoformat()
     }
   if auth_lookup.password:
-    password_method: PasswordMethod = auth_lookup.password_method
+    password_method: PasswordAuth = auth_lookup.password_auth
     password_auth = {
       "last_used": password_method.last_used.isoformat(),
       "last_changed": password_method.last_changed.isoformat(),

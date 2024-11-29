@@ -10,7 +10,7 @@ from core.google.recaptcha_service import verify_recaptcha
 from core.school_verification.sv_request_service import add_request, add_evidence
 from core.user import user_info_service
 from database.database import create_connection
-from models.database_models import Identity
+from models.database_models.relational.identity import Identity
 from models.request_models.school_verification_requests import NewVerificationRequest, WithdrawVerificationRequest
 
 log = logging.getLogger(__name__)

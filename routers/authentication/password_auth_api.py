@@ -12,7 +12,7 @@ from core.google.recaptcha_service import verify_recaptcha
 from core.user import user_info_service
 from core.user.add_user_service import add_password_user
 from database.database import create_connection
-from models.database_models import Identity
+from models.database_models.relational.identity import Identity
 from models.request_models.password_requests import UpdatePasswordRequest
 from models.request_models.register_requests import PasswordRegisterRequest
 from models.request_models.signin_requests import PasswordSigninRequest

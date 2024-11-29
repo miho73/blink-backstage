@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from pydantic import EmailStr
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, BOOLEAN, SMALLINT, TIMESTAMP
 from sqlalchemy.orm import relationship
@@ -15,7 +16,7 @@ class Identity(TableBase):
   user_id: int = Column(INTEGER, primary_key=True, index=True, unique=True, nullable=False, autoincrement=True)
   username: str = Column(VARCHAR, nullable=False)
 
-  email: str = Column(VARCHAR, nullable=False, unique=True)
+  email: EmailStr = Column(VARCHAR, nullable=False, unique=True)
   email_verified: bool = Column(BOOLEAN, nullable=False, default=False)
 
   join_date: datetime = Column(TIMESTAMP, nullable=False, default="now()")

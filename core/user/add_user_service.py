@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 from core.cryptography.bcrypt import hash_bcrypt
 from core.google.google_oauth_service import get_google_user
 from core.validation import validate_all, length_check, regex_check, assert_value
-from models.database_models import GoogleMethod, Identity, AuthLookup
-from models.database_models.password_auth import PasswordMethod
+from models.database_models.relational.auth_lookup import AuthLookup
+from models.database_models.relational.google_auth import GoogleAuth
+from models.database_models.relational.identity import Identity
+from models.database_models.relational.password_auth import PasswordAuth
 from models.request_models.register_requests import GoogleRegisterRequest, PasswordRegisterRequest
 from models.user import GoogleUser
 
@@ -41,12 +43,12 @@ def add_google_user(request: GoogleRegisterRequest, db: Session):
     identity=identity
   )
 
-  google_method: GoogleMethod = GoogleMethod(
+  google_auth: GoogleAuth = GoogleAuth(
     google_id=google_user.google_id,
     auth_lookup=auth_lookup
   )
 
-  db.add(google_method)
+  db.add(google_auth)
   log.debug("Added new google user to database. google_sub=\"{}\"".format(google_user.google_id))
 
 
@@ -66,7 +68,7 @@ def add_password_user(request: PasswordRegisterRequest, db: Session):
     identity=identity
   )
 
-  password_method: PasswordMethod = PasswordMethod(
+  password_method: PasswordAuth = PasswordAuth(
     user_id=request.id,
     password=pwd,
 

@@ -1,11 +1,11 @@
 import re
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, EmailStr
 
 
 class UpdateUserProfileRequest(BaseModel):
   username: str
-  email: str
+  email: EmailStr
   recaptcha: str
 
   @field_validator("username", mode="before")

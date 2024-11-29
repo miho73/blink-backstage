@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 
-from models.database_models.schools import School, SchoolType, Sex
+from models.database_models.relational.schools import School, SchoolType, Sex
 from models.request_models.school_requests import AddSchoolRequest
 
 log = logging.getLogger(__name__)

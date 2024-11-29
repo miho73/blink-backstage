@@ -7,10 +7,9 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from core.user.user_info_service import get_identity_by_userid
-from models.database_models import Identity
-from models.database_models.schools import School
-from models.database_models.verification import SvRequest, SvState
-from models.request_models.school_verification_requests import WithdrawVerificationRequest
+from models.database_models.relational.identity import Identity
+from models.database_models.relational.schools import School
+from models.database_models.relational.verification import SvRequest, SvState
 from models.request_models.school_verification_requests import SvEvaluation
 
 log = logging.getLogger(__name__)

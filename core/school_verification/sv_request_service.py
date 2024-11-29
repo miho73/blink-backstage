@@ -5,8 +5,8 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from core.user import user_info_service
-from models.database_models import Identity
-from models.database_models.verification import SvRequest, SvRequestType, SvState, SvEvidenceType
+from models.database_models.relational.identity import Identity
+from models.database_models.relational.verification import SvRequest, SvRequestType, SvState, SvEvidenceType
 from models.request_models.school_verification_requests import NewVerificationRequest
 
 log = logging.getLogger(__name__)

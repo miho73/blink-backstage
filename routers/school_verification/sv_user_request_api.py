@@ -9,7 +9,7 @@ from core.authentication.authorization_service import authorization_header, auth
 from core.google.recaptcha_service import verify_recaptcha
 from core.school_verification.sv import get_request_list, withdraw_verification
 from database.database import create_connection
-from models.database_models.verification import SvRequest
+from models.database_models.relational.verification import SvRequest
 from models.request_models.school_verification_requests import WithdrawVerificationRequest
 
 log = logging.getLogger(__name__)

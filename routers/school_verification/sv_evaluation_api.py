@@ -8,9 +8,8 @@ from starlette.responses import JSONResponse
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.school_verification.sv import get_sv_request_detail, get_evidence, evaluate_sv
 from database.database import create_connection
-from models.database_models.verification import SvEvidenceType
+from models.database_models.relational.verification import SvEvidenceType
 from models.request_models.school_verification_requests import SvEvaluation
-from routers.school_verification.sv_access_api import get_sv_list
 
 log = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from google_auth_oauthlib.flow import Flow
 
 from core.config import config
 from core.jwt import jwt_service
-from models.database_models.identity import Identity
+from models.database_models.relational.identity import Identity
 from models.user import GoogleUser
 
 log = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ def get_google_sub(access_token: str) -> str:
 def complete_google_authentication(identity: Identity) -> str:
   log.debug("Completing google authentication. user_id=\"{user_id}\"".format(user_id=identity.user_id))
   identity.last_login = datetime.now()
-  identity.auth_lookup.google_method.last_used = datetime.now()
+  identity.auth_lookup.google_auth.last_used = datetime.now()
 
   log.debug("Issued JWT. user_id=\"{user_id}\", role=\"{role}\"".format(user_id=identity.user_id, role=identity.role))
   return jwt_service.create_token(identity.user_id, identity.role)
