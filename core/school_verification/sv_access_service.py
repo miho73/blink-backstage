@@ -57,8 +57,8 @@ def access_get_sv(db: Session, **kwargs):
 
     res.append({
       'verificationId': sv.verification_id,
-      'user_id': sv.user_id,
-      'request_time': sv.request_time.isoformat(),
+      'userId': sv.user_id,
+      'requestTime': sv.request_time.isoformat(),
       'evidence': sv.evidence is not None,
       'grade': sv.grade,
       'schoolName': sv.school,

@@ -12,6 +12,7 @@ from database.database import create_connection
 from models.database_models.relational.auth_lookup import AuthLookup
 from models.database_models.relational.google_auth import GoogleAuth
 from models.database_models.relational.identity import Identity
+from models.database_models.relational.passkey_auth import PasskeyAuth
 from models.database_models.relational.password_auth import PasswordAuth
 from models.request_models.user_requests import UpdateUserProfileRequest
 
@@ -80,21 +81,36 @@ def get_auth_lookup_api(
 
   auth_lookup: AuthLookup = identity.auth_lookup
 
-  google_auth = None
-  password_auth = None
+  auth_config: dict = {}
+
+  google_auth: GoogleAuth
+  password_auth: PasswordAuth
 
   if auth_lookup.google:
     google_auth: GoogleAuth = auth_lookup.google_auth
-    google_auth = {
+    auth_config['google'] = {
       "last_used": google_auth.last_used.isoformat()
     }
   if auth_lookup.password:
     password_method: PasswordAuth = auth_lookup.password_auth
-    password_auth = {
+    auth_config['password'] = {
       "last_used": password_method.last_used.isoformat(),
       "last_changed": password_method.last_changed.isoformat(),
       "id": password_method.user_id
     }
+  if auth_lookup.passkey >= 1:
+    passkeys: list[PasskeyAuth] = auth_lookup.passkey_auth
+    passkey_config = []
+
+    for passkey in passkeys:
+      passkey_config.append({
+        "lastUsed": passkey.last_used.isoformat() if passkey.last_used is not None else None,
+        "name": passkey.passkey_name,
+        "aaguid": passkey.aaguid,
+        "createdAt": passkey.created_at.isoformat()
+      })
+
+    auth_config['passkey'] = passkey_config
 
   return JSONResponse(
     content={
@@ -102,10 +118,7 @@ def get_auth_lookup_api(
       "google": auth_lookup.google,
       "password": auth_lookup.password,
       "passkey": auth_lookup.passkey,
-      "auth": {
-        "google": google_auth,
-        "password": password_auth
-      }
+      "auth": auth_config
     }
   )
 

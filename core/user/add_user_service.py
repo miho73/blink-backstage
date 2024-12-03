@@ -37,8 +37,6 @@ def add_google_user(request: GoogleRegisterRequest, db: Session):
 
   auth_lookup: AuthLookup = AuthLookup(
     google=True,
-    password=False,
-    passkey=False,
 
     identity=identity
   )

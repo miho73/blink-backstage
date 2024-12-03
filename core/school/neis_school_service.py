@@ -40,12 +40,12 @@ def query_school_info(school_name: str) -> list[dict]:
       school_type = school['SCHUL_KND_SC_NM']
 
     ret.append({
-      'school_name': school['SCHUL_NM'],
-      'school_class': school['SCHUL_KND_SC_NM'],
-      'neis_code': school['ATPT_OFCDC_SC_CODE'] + school['SD_SCHUL_CODE'],
+      'schoolName': school['SCHUL_NM'],
+      'schoolClass': school['SCHUL_KND_SC_NM'],
+      'neisCode': school['ATPT_OFCDC_SC_CODE'] + school['SD_SCHUL_CODE'],
       'address': school['ORG_RDNMA'],
       'sex': school['COEDU_SC_NM'],
-      'school_type': school_type
+      'schoolType': school_type
     })
 
   return ret

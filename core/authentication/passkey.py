@@ -119,6 +119,7 @@ def add_passkey(user_id: int, request: RegisterPasskeyRequest, register_option: 
     aaguid=registration.aaguid,
   )
   db.add(passkey_auth)
+  identity.auth_lookup.passkey += 1
   db.commit()
 
 def auth_passkey(body: SignInPasskeyRequest, PSK_AUTH_SEK: str, db: Session) -> str:
@@ -168,5 +169,7 @@ def auth_passkey(body: SignInPasskeyRequest, PSK_AUTH_SEK: str, db: Session) -> 
 
   jwt = jwt_service.create_token(identity.user_id, identity.role)
   log.debug("Issued JWT. user_uid=\"{}\"".format(identity.user_id))
+
+  db.commit()
 
   return jwt

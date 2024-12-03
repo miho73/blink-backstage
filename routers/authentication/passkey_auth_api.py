@@ -146,3 +146,26 @@ def register_passkey_api(
       'state': 'OK'
     }
   )
+
+@router.get(
+  path='/aaguid/{theme}/{aaguid}',
+  summary="Get authenticator icon by aaguid",
+)
+def get_authenticator(
+  aaguid: str
+):
+  authenticator = passkey.get_authenticator(aaguid)
+  if authenticator is None:
+    log.debug("Authenticator not found. aaguid=\"{}\"".format(aaguid))
+    raise HTTPException(status_code=404, detail="Authenticator not found")
+
+  return JSONResponse(
+    content={
+      'code': 200,
+      'state': 'OK',
+      'icon': {
+        'light': authenticator.icon_light,
+        'dark': authenticator.icon_dark
+      }
+    }
+  )

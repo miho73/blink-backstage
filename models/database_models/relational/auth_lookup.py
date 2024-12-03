@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import INTEGER, BOOLEAN
+from sqlalchemy.dialects.postgresql import INTEGER, BOOLEAN, SMALLINT
 from sqlalchemy.orm import relationship
 
 from database.database import TableBase
@@ -14,7 +14,7 @@ class AuthLookup(TableBase):
 
   google = Column(BOOLEAN, nullable=False, default=False)
   password = Column(BOOLEAN, nullable=False, default=False)
-  passkey = Column(BOOLEAN, nullable=False, default=False)
+  passkey = Column(SMALLINT, nullable=False, default=0)
 
   identity = relationship("Identity", back_populates="auth_lookup")
 
