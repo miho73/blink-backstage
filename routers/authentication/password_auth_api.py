@@ -104,14 +104,14 @@ def update_user_password_api(
   auth: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug('Change password upon JWT. jwt=\"{}\"'.format(auth))
-
   if verify_recaptcha(body.recaptcha, request.client.host, 'changePassword') is False:
     log.debug("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   token = authorize_jwt(auth)
   sub = token.get("sub")
+
+  log.debug('Change password. sub=\"{}\"'.format(sub))
 
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:

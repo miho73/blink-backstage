@@ -26,11 +26,11 @@ def get_sv_list(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Getting sv list upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get('sub')
   aud = token.get('aud')
+
+  log.debug("Getting sv list. sub=\"{}\"".format(sub))
 
   if 'blink:admin' not in aud:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))

@@ -28,10 +28,10 @@ def get_sv_requests_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Getting school school verification data upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+
+  log.debug("Getting school school verification data. sub=\"{}\"".format(sub))
 
   request_list = get_request_list(sub, db)
 
@@ -57,7 +57,7 @@ def delete_sv_request_api(
   token = request.headers.get("Recaptcha")
 
   if vid is None or token is None:
-    log.debug("Request ID or reCAPTCHA token was not found in headers. jwt=\"{}\"".format(jwt))
+    log.debug("Request ID or reCAPTCHA token was not found in headers")
     raise HTTPException(status_code=400, detail="Invalid Request")
 
   # google recaptcha
@@ -67,10 +67,10 @@ def delete_sv_request_api(
 
   vd = int(vid)
 
-  log.debug("Deleting school verification request upon JWT. jwt=\"{}\". request_id=\"{}\"".format(jwt, vd))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+
+  log.debug("Deleting school verification request. sub=\"{}\". request_id=\"{}\"".format(sub, vd))
 
   result = db.execute(
     delete(SvRequest)
@@ -107,14 +107,14 @@ def withdraw_verification_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug('Withdraw verification upon JWT. jwt=\"{}\"'.format(jwt))
-
   if verify_recaptcha(body.recaptcha, request.client.host, 'sv/withdraw') is False:
     log.debug("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   token = authorize_jwt(jwt)
   sub = token.get('sub')
+
+  log.debug('Withdraw verification. sub=\"{}\"'.format(sub))
 
   withdraw_verification(sub, db)
   db.commit()

@@ -28,11 +28,11 @@ def get_sv_request_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug('Getting SV request info upon JWT. jwt=\"{}\"'.format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
   aud = token.get("aud")
+
+  log.debug('Getting SV request info. sub=\"{}\"'.format(sub))
 
   if 'blink:admin' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
@@ -69,11 +69,11 @@ def get_evidence_api(
     log.debug('JWT was not given')
     raise HTTPException(status_code=403, detail='Forbidden')
 
-  log.debug('Get SV request evidence by JWT. jwt=\"{}\"'.format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
   aud = token.get("aud")
+
+  log.debug('Get SV request evidence. sub=\"{}\"'.format(sub))
 
   if 'blink:admin' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
@@ -113,11 +113,11 @@ def evaluate_sv_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug('Evaluate SV request using JWT. jwt=\"{}\"'.format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get('sub')
   aud = token.get('aud')
+
+  log.debug('Evaluate SV request. sub=\"{}\"'.format(sub))
 
   if 'blink:admin' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))

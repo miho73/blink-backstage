@@ -31,14 +31,14 @@ def submit_sv_draft_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Added new verification request upon JWT. jwt=\"{}\"".format(jwt))
-
   if verify_recaptcha(body.recaptcha, request.client.host, 'sv/new') is False:
     log.debug("Recaptcha school_verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+
+  log.debug("Added new verification request. sub=\"{}\"".format(sub))
 
   add_request(sub, body, db)
   db.commit()
@@ -61,10 +61,10 @@ async def upload_sv_evidence_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Upload evidence upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+
+  log.debug("Upload evidence. sub=\"{}\"".format(sub))
 
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:

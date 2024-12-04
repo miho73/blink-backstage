@@ -21,10 +21,11 @@ def query_neis_school(
   request: Request,
   jwt: str = Security(authorization_header)
 ):
-  log.debug("Querying NEIS school data upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
+  sub = token.get('sub')
   aud = token.get('aud')
+
+  log.debug("Querying NEIS school data. sub=\"{}\"".format(sub))
 
   school_name = request.query_params.get('schoolName')
 

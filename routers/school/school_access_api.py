@@ -27,10 +27,11 @@ def add_school_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Adding school upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+
+  log.debug("Adding school. sub=\"{}\"".format(sub))
+
   if 'blink:admin' not in token['aud']:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
@@ -55,11 +56,11 @@ def get_school_list_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Getting school list upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   aud = token.get('aud')
   sub = token.get("sub")
+
+  log.debug("Getting school list. sub=\"{}\"".format(sub))
 
   school_name = request.query_params.get('schoolName')
 
@@ -100,11 +101,11 @@ def deletes_school_api(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Deleting school upon JWT. jwt=\"{}\"".format(jwt))
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
   aud = token.get("aud")
+
+  log.debug("Deleting school. sub=\"{}\"".format(sub))
 
   school_uid = request.headers.get('School-Uid')
 

@@ -41,5 +41,5 @@ def authorize_jwt(token: str) -> dict:
     log.debug("Auth failed: JWT is invalid or unauthorized")
     raise HTTPException(status_code=401, detail="JWT is invalid or unauthorized")
 
-  log.debug("Authorized JWT token. jwt=\"{}\"".format(token))
+  log.debug("Authorized JWT token. sub=\"{}\"".format(jwt_body.get("sub")))
   return jwt_body

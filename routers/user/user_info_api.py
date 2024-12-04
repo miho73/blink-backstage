@@ -32,10 +32,11 @@ def get_user_api(
   auth: str = Security(authorization_header),
   db=Depends(create_connection)
 ):
-  log.debug("Getting user information upon JWT. jwt=\"{}\"".format(auth))
   token = authorize_jwt(auth)
 
   sub = token.get("sub")
+
+  log.debug("Getting user information. sub=\"{}\"".format(sub))
 
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
@@ -69,10 +70,10 @@ def get_auth_lookup_api(
   auth: str = Security(authorization_header),
   db=Depends(create_connection)
 ):
-  log.debug('Query auth lookup upon JWT. jwt=\"{}\"'.format(auth))
   token = authorize_jwt(auth)
-
   sub = token.get("sub")
+
+  log.debug('Query auth lookup. sub=\"{}\"'.format(sub))
 
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
@@ -132,10 +133,10 @@ def get_verification_info_api(
   auth: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  log.debug("Getting school school_verification data upon JWT. jwt=\"{}\"".format(auth))
-
   token = authorize_jwt(auth)
   sub = token.get("sub")
+
+  log.debug("Getting school school_verification data. sub=\"{}\"".format(sub))
 
   identity: Identity = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
