@@ -30,14 +30,12 @@ def add_google_user(request: GoogleRegisterRequest, db: Session):
 
   identity: Identity = Identity(
     username=request.username,
-
     email=google_user.email,
     email_verified=google_user.email_verified
   )
 
   auth_lookup: AuthLookup = AuthLookup(
     google=True,
-
     identity=identity
   )
 
@@ -59,17 +57,13 @@ def add_password_user(request: PasswordRegisterRequest, db: Session):
   )
 
   auth_lookup: AuthLookup = AuthLookup(
-    google=False,
     password=True,
-    passkey=False,
-
     identity=identity
   )
 
   password_method: PasswordAuth = PasswordAuth(
     user_id=request.id,
     password=pwd,
-
     auth_lookup=auth_lookup
   )
 

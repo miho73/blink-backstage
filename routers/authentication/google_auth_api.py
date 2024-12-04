@@ -66,14 +66,14 @@ def google_login_callback_api(
 
   if e_cookie_state is None or response_state is None:
     log.error("Callback or Cookie State is unset")
-    return RedirectResponse("/auth?error=state_unset", 302)
+    return RedirectResponse("/auth?error=state-unset", 302)
 
   cookie_state = aes256.decrypt(e_cookie_state)
   log.debug("Decrypted cookie state. cookie_state=\"{cookie_state}\", callback_state=\"{response_state}\"".format(
     cookie_state=cookie_state, response_state=response_state))
   if cookie_state is None or cookie_state != response_state:
     log.error("States from cookie and callback does not match")
-    return RedirectResponse("/auth?error=state_mismatch", 302)
+    return RedirectResponse("/auth?error=state-mismatch", 302)
 
   # check if user exists in google methods
   code = request.query_params.get("code")
