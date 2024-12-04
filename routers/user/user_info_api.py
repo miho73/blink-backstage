@@ -107,7 +107,8 @@ def get_auth_lookup_api(
         "lastUsed": passkey.last_used.isoformat() if passkey.last_used is not None else None,
         "name": passkey.passkey_name,
         "aaguid": passkey.aaguid,
-        "createdAt": passkey.created_at.isoformat()
+        "createdAt": passkey.created_at.isoformat(),
+        "passkeyId": str(passkey.passkey_id)
       })
 
     auth_config['passkey'] = passkey_config

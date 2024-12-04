@@ -169,3 +169,69 @@ def get_authenticator(
       }
     }
   )
+
+@router.delete(
+  path='/{passkey_uuid}',
+  description="Delete passkey",
+)
+def delete_passkey(
+  passkey_uuid: str,
+  request: Request,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.debug("User requested passkey deletion. passkey_uuid=\"{}\"".format(passkey_uuid))
+
+  recaptcha = request.headers.get('Recaptcha')
+  if recaptcha is None:
+    log.debug("Recaptcha not found. passkey_uuid=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Recaptcha not found")
+
+  if verify_recaptcha(recaptcha, request.client.host, 'delete/passkey') is False:
+    log.debug("Recaptcha verification failed. passkey_uuid=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Recaptcha verification failed")
+
+  token = authorize_jwt(jwt)
+  sub = token.get("sub")
+
+  passkey.delete_passkey(passkey_uuid, sub, db)
+
+  return JSONResponse(
+    content={
+      'code': 200,
+      'state': 'OK'
+    }
+  )
+
+@router.patch(
+  path='/{passkey_uuid}',
+  summary="Update passkey name",
+)
+def rename_passkey(
+  passkey_uuid: str,
+  body: dict,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.debug("User requested passkey renaming. passkey_uuid=\"{}\"".format(passkey_uuid))
+
+  token = authorize_jwt(jwt)
+  sub = token.get("sub")
+  name = body['name']
+
+  if name is None:
+    log.debug("Name not found. passkey_uuid=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Name not found")
+
+  if len(name) > 255:
+    log.debug("Name too long. passkey_uuid=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Name too long")
+
+  passkey.rename_passkey(passkey_uuid, sub, name, db)
+
+  return JSONResponse(
+    content={
+      'code': 200,
+      'state': 'OK'
+    }
+)

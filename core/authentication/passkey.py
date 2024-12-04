@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Type
 
 from fastapi import HTTPException
+from pydantic import UUID4
 from sqlalchemy.orm import Session
 from webauthn import generate_registration_options, generate_authentication_options, options_to_json, \
   verify_registration_response, verify_authentication_response
@@ -15,7 +16,6 @@ from webauthn.helpers.structs import UserVerificationRequirement, AuthenticatorS
 from core.authentication.aaguid import get_authenticator
 from core.config import config
 from core.jwt import jwt_service
-from core.user import user_info_service
 from database.database import redis_db
 from models.database_models.relational.identity import Identity
 from models.database_models.relational.passkey_auth import PasskeyAuth
@@ -173,3 +173,39 @@ def auth_passkey(body: SignInPasskeyRequest, PSK_AUTH_SEK: str, db: Session) -> 
   db.commit()
 
   return jwt
+
+
+def delete_passkey(passkey_uuid: str, sub: int, db: Session):
+  uuid = UUID4(passkey_uuid)
+  passkey_auth = db.query(PasskeyAuth).filter(PasskeyAuth.passkey_id == uuid).first()
+
+  if passkey_auth is None:
+    log.debug("Passkey not found. passkey_id=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Passkey not found")
+
+  if passkey_auth.auth_lookup.identity.user_id != int(sub):
+    log.debug("Passkey does not belong to user. passkey_id=\"{}\", user_uid=\"{}\"".format(passkey_uuid, sub))
+    raise HTTPException(status_code=400, detail="Passkey not found")
+
+  db.delete(passkey_auth)
+  passkey_auth.auth_lookup.passkey -= 1
+  db.commit()
+  log.debug("Passkey deleted. passkey_id=\"{}\"".format(passkey_uuid))
+
+
+def rename_passkey(passkey_uuid, sub, name, db):
+  uuid = UUID4(passkey_uuid)
+  passkey_auth = db.query(PasskeyAuth).filter(PasskeyAuth.passkey_id == uuid).first()
+
+  if passkey_auth is None:
+    log.debug("Passkey not found. passkey_id=\"{}\"".format(passkey_uuid))
+    raise HTTPException(status_code=400, detail="Passkey not found")
+
+
+  if passkey_auth.auth_lookup.identity.user_id != int(sub):
+    log.debug("Passkey does not belong to user. passkey_id=\"{}\", user_uid=\"{}\"".format(passkey_uuid, sub))
+    raise HTTPException(status_code=400, detail="Passkey not found")
+
+  passkey_auth.passkey_name = name
+  db.commit()
+  log.debug("Passkey renamed. passkey_id=\"{}\"".format(passkey_uuid))
