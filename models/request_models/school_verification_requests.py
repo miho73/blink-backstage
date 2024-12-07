@@ -65,6 +65,12 @@ class SvEvaluation(BaseModel):
   school_id: int
   grade: int
 
+  class Config:
+    alias_generator = lambda field: ''.join(
+      word.capitalize() if i > 0 else word for i, word in enumerate(field.split('_'))
+    )
+    allow_population_by_field_name = True
+
   @field_validator("state", mode="before")
   @classmethod
   def validate_state(cls, value):

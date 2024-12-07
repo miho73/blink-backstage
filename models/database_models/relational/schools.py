@@ -27,14 +27,12 @@ class School(TableBase):
   __table_args__ = {"schema": "school"}
 
   school_id: int = Column(INTEGER, primary_key=True, index=True, unique=True, nullable=False, autoincrement=True)
-  school_name: str = Column(VARCHAR, nullable=False)
+  school_name: str = Column(VARCHAR(50), nullable=False, index=True)
   _school_type: int = Column("school_type", SMALLINT, nullable=False)
-  neis_code: str = Column(VARCHAR, nullable=False)
+  neis_code: str = Column(VARCHAR(10), nullable=False)
   address: str = Column(VARCHAR, nullable=False)
   _sex: int = Column("sex", SMALLINT, nullable=False)
   user_count: int = Column(INTEGER, nullable=False, default=0)
-
-  students = relationship("Identity", back_populates='school', uselist=True)
 
   @property
   def school_type(self):

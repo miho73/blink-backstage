@@ -8,6 +8,12 @@ class AddSchoolRequest(BaseModel):
   neis_code: str
   sex: str
 
+  class Config:
+    alias_generator = lambda field: ''.join(
+      word.capitalize() if i > 0 else word for i, word in enumerate(field.split('_'))
+    )
+    allow_population_by_field_name = True
+
   @field_validator('school_name', mode='before')
   @classmethod
   def check_school_name(cls, value):

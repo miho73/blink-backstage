@@ -4,7 +4,7 @@ from typing import Optional
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, TIMESTAMP, SMALLINT, BYTEA, VARCHAR
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from database.database import TableBase
 
@@ -44,12 +44,12 @@ class SvRequest(TableBase):
   evidence: bytes = Column(BYTEA)
   _evidence_type: int = Column('evidence_type', SMALLINT)
   grade: int = Column(SMALLINT, nullable=False)
-  name: str = Column(VARCHAR, nullable=False)
-  school: str = Column(VARCHAR, nullable=False)
+  name: str = Column(VARCHAR(20), nullable=False)
+  school: str = Column(VARCHAR(50), nullable=False)
   _state: int = Column('state', SMALLINT, nullable=False, default=0)
-  doc_code: str = Column(VARCHAR)
+  doc_code: str = Column(VARCHAR(19))
 
-  identity = relationship("Identity")
+  identity = relationship("Identity", backref=backref("verification", uselist=True))
 
   @property
   def request_type(self):

@@ -54,13 +54,13 @@ def get_school_list(school_name: str, db: Session) -> list[dict]:
       raise HTTPException(status_code=500, detail='Database integrity')
 
     ret.append({
-      "school_id": school.school_id,
-      "school_name": school.school_name,
-      "school_type": stype,
-      "neis_code": school.neis_code,
+      "schoolId": school.school_id,
+      "schoolName": school.school_name,
+      "schoolType": stype,
+      "neisCode": school.neis_code,
       "address": school.address,
       "sex": sex,
-      "user_count": school.user_count,
+      "userCount": school.user_count,
     })
 
   return ret
