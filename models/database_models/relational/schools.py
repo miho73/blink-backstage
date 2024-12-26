@@ -1,8 +1,10 @@
 from enum import Enum
 
-from sqlalchemy import Column
+from sqlalchemy import Column, UUID
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT
-from sqlalchemy.orm import relationship
+from uuid import UUID as PyUUID
+
+from sqlalchemy.orm import Mapped
 
 from database.database import TableBase
 
@@ -26,13 +28,13 @@ class School(TableBase):
   __tablename__ = "schools"
   __table_args__ = {"schema": "school"}
 
-  school_id: int = Column(INTEGER, primary_key=True, index=True, unique=True, nullable=False, autoincrement=True)
-  school_name: str = Column(VARCHAR(50), nullable=False, index=True)
-  _school_type: int = Column("school_type", SMALLINT, nullable=False)
-  neis_code: str = Column(VARCHAR(10), nullable=False)
-  address: str = Column(VARCHAR, nullable=False)
-  _sex: int = Column("sex", SMALLINT, nullable=False)
-  user_count: int = Column(INTEGER, nullable=False, default=0)
+  school_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, index=True, unique=True, nullable=False, server_default='gen_random_uuid()')
+  school_name: Mapped[str] = Column(VARCHAR(50), nullable=False, index=True)
+  _school_type: Mapped[int] = Column("school_type", SMALLINT, nullable=False)
+  neis_code: Mapped[str] = Column(VARCHAR(10), nullable=False)
+  address: Mapped[str] = Column(VARCHAR, nullable=False)
+  _sex: Mapped[int] = Column("sex", SMALLINT, nullable=False)
+  user_count: Mapped[int] = Column(INTEGER, nullable=False, default=0)
 
   @property
   def school_type(self):

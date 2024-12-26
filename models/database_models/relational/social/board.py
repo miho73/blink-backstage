@@ -4,7 +4,7 @@ from enum import Enum
 from uuid import UUID as PyUUID
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, TIMESTAMP, UUID, SMALLINT
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 
 from database.database import TableBase
 
@@ -18,14 +18,12 @@ class Board(TableBase):
   __tablename__ = "board"
   __table_args__ = {"schema": "social"}
 
-  board_id: PyUUID = Column(UUID(as_uuid=True), primary_key=True, unique=True, index=True, nullable=False, server_default="gen_random_uuid()")
-  name: str = Column(VARCHAR(128), nullable=False)
-  owner_id: int = Column(INTEGER, ForeignKey("users.identity.user_id"), nullable=False)
-  created_at: datetime = Column(TIMESTAMP, nullable=False, server_default="now()")
+  board_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, unique=True, index=True, nullable=False, server_default="gen_random_uuid()")
+  name: Mapped[str] = Column(VARCHAR(128), nullable=False)
+  created_at: Mapped[datetime] = Column(TIMESTAMP, nullable=False, server_default="now()")
 
-  _state: int = Column('state', SMALLINT, nullable=False, server_default="0")
+  _state: Mapped[int] = Column('state', SMALLINT, nullable=False, server_default="0")
 
-  owner = relationship("User", back_populates="boards")
 
   @property
   def state(self):

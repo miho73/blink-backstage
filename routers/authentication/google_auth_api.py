@@ -36,7 +36,7 @@ def start_google_login_api():
   response = RedirectResponse(auth_url, 302)
   log.debug("Sent 302 Redirect. url=\"{url}\"".format(url=auth_url))
   response.set_cookie(
-    key="with-state",
+    key="blink-state",
     value=e_state,
     httponly=True,
     secure=config['env'] == "production",
@@ -58,7 +58,7 @@ def google_login_callback_api(
   log.info("Handling Google OAuth2 callback")
 
   # check state
-  e_cookie_state = request.cookies.get("with-state")
+  e_cookie_state = request.cookies.get("blink-state")
   response_state = request.query_params.get("state")
   log.debug(
     "Checking state cookie and callback. cookie_state=\"{cookie_state}\", callback_state=\"{response_state}\"".format(
@@ -91,7 +91,7 @@ def google_login_callback_api(
     jwt = complete_google_authentication(identity)
     db.commit()
     response = RedirectResponse("/auth/complete?jwt={jwt}".format(jwt=jwt), 302)
-    response.delete_cookie("with-state")
+    response.delete_cookie("blink-state")
     return response
 
 
@@ -121,5 +121,5 @@ def register_google_user_api(
       "state": "CREATED",
     }
   )
-  response.delete_cookie("with-state")
+  response.delete_cookie("blink-state")
   return response

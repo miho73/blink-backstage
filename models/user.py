@@ -1,13 +1,7 @@
 import re
-from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, field_validator, EmailStr
-
-
-class Role(Enum):
-  USER = 0
-  ADMIN = 1
 
 
 class User(BaseModel):
@@ -18,7 +12,7 @@ class User(BaseModel):
   email_verified: bool = False
 
   student_verified: bool = False
-  role: Role = Role.USER
+  role: Optional[list[str]] = None
 
   @field_validator("email", mode="before")
   @classmethod
@@ -45,7 +39,7 @@ class GoogleUser(User):
 class JwtUser(BaseModel):
   user_id: int
   username: str
-  role: Role
+  role: list[str]
 
   @field_validator("username", mode="before")
   @classmethod

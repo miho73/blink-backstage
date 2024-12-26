@@ -32,7 +32,7 @@ def add_school_api(
 
   log.debug("Adding school. sub=\"{}\"".format(sub))
 
-  if 'blink:admin' not in token['aud']:
+  if 'root:access' not in token['aud']:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
 
@@ -64,7 +64,7 @@ def get_school_list_api(
 
   school_name = request.query_params.get('schoolName')
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     return JSONResponse(
       status_code=403,
@@ -109,7 +109,7 @@ def deletes_school_api(
 
   school_uid = request.headers.get('School-Uid')
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
 

@@ -5,19 +5,12 @@ import jwt
 from jwt import InvalidTokenError
 
 from core.config import config
-from models.user import Role
-
-DB_ROLE_CODE_TO_ROLE = {
-  Role.USER: ['blink:user'],
-  Role.ADMIN: ['blink:user', 'blink:admin']
-}
 
 KST = timezone(timedelta(hours=9))
 
-
-def create_token(user_id: int, role: Role) -> str:
+def create_token(user_id: int, role: list[str]) -> str:
   payload = {
-    'aud': DB_ROLE_CODE_TO_ROLE[role],
+    'aud': role,
     'sub': str(user_id),
     'exp': datetime.now(KST) + timedelta(weeks=5),
     'iat': datetime.now(KST),
@@ -40,7 +33,7 @@ def validate_token(token: str) -> bool:
       verify_signature=True,
       issuer='blink',
       require=['aud', 'exp', 'iat', 'iss'],
-      audience=['blink:user', 'blink:admin']
+      audience=['core:user']
     )
   except InvalidTokenError as e:
     return False
@@ -56,7 +49,7 @@ def decode(token: str) -> dict:
     verify_signature=True,
     issuer='blink',
     require=['aud', 'exp', 'iat', 'iss'],
-    audience=['blink:user', 'blink:admin'],
+    audience=['core:user'],
   )
 
 
@@ -69,7 +62,7 @@ def validate_authentication(token: str) -> bool:
       verify_signature=True,
       issuer='blink',
       require=['aud', 'exp', 'iat', 'iss'],
-      audience=['blink:user', 'blink:admin'],
+      audience=['core:user'],
     )
   except InvalidTokenError:
     return False
@@ -81,3 +74,9 @@ def get_sub(token: dict) -> Optional[int]:
   if sub is None:
     return None
   return int(sub)
+
+def get_aud(token: dict) -> Optional[list[str]]:
+  aud = token.get('aud')
+  if aud is None:
+    return []
+  return aud

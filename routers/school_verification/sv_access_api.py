@@ -32,7 +32,7 @@ def get_sv_list(
 
   log.debug("Getting sv list. sub=\"{}\"".format(sub))
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 

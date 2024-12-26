@@ -115,9 +115,8 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
   sv._state = judge.state
   sv.examine_time = datetime.now()
   if judge.state is SvState.ACCEPTED.value:
-    sv.identity.school_id = judge.school_id
     sv.identity.grade = judge.grade
-    sv.identity.student_verified = True
+    sv.identity.role += ['core:student', 'sv:'+str(judge.verification_id)]
 
     school = (
       db.query(School)
@@ -126,6 +125,7 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
     )
 
     school.user_count = school.user_count + 1
+
 
 
 def withdraw_verification(sub: int, db: Session):

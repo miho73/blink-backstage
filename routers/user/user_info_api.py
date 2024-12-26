@@ -1,4 +1,6 @@
 import logging
+from typing import Type
+from uuid import UUID
 
 from fastapi import APIRouter, Security, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -14,6 +16,7 @@ from models.database_models.relational.google_auth import GoogleAuth
 from models.database_models.relational.identity import Identity
 from models.database_models.relational.passkey_auth import PasskeyAuth
 from models.database_models.relational.password_auth import PasswordAuth
+from models.database_models.relational.schools import School
 from models.request_models.user_requests import UpdateUserProfileRequest
 
 log = logging.getLogger(__name__)
@@ -33,7 +36,6 @@ def get_user_api(
   db=Depends(create_connection)
 ):
   token = authorize_jwt(auth)
-
   sub = token.get("sub")
 
   log.debug("Getting user information. sub=\"{}\"".format(sub))
@@ -47,13 +49,12 @@ def get_user_api(
   return JSONResponse(
     content={
       "user": {
-        "role": identity.role.name,
+        "role": identity.role,
         "user_id": identity.user_id,
         "email": identity.email,
         "emailVerified": identity.email_verified,
         "username": identity.username,
-        "last_login": identity.last_login.isoformat(),
-        "student_verified": identity.student_verified
+        "lastLogin": identity.last_login.isoformat(),
       },
       "code": 200,
       "state": "OK"
@@ -138,15 +139,39 @@ def get_verification_info_api(
 
   log.debug("Getting school school_verification data. sub=\"{}\"".format(sub))
 
-  identity: Identity = user_info_service.get_identity_by_userid(sub, db)
+  identity: Type[Identity] = user_info_service.get_identity_by_userid(sub, db)
   if identity is None:
     log.debug("Identity specified by JWT was not found. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=400, detail="Identity not found")
 
-  if identity.student_verified:
+  student_verified: bool = False
+  school_id = None
+
+  for role in identity.role:
+    if role == 'core:student':
+      student_verified = True
+    elif role.startswith('sv:'):
+      school_id = UUID(role.split(':')[1])
+
+  if not student_verified:
+    log.debug("User is not a student. user_uid=\"{}\"".format(sub))
+    return JSONResponse(
+      content={
+        'verified': False,
+        'school': None
+      }
+    )
+
+  school = db.query(School).filter_by(school_id=school_id).first()
+
+  if school is None:
+    log.debug("School information is missing. user_uid=\"{}\"".format(sub))
+    raise HTTPException(status_code=400, detail="School information is missing")
+
+  if student_verified:
     school = {
-      "name": identity.school.school_name,
-      "id": identity.school.school_id,
+      "name": school.school_name,
+      "id": school.school_id,
       "grade": identity.grade
     }
   else:
@@ -154,7 +179,7 @@ def get_verification_info_api(
 
   return JSONResponse(
     content={
-      'verified': identity.student_verified,
+      'verified': True,
       'school': school
     }
   )

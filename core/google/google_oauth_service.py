@@ -51,7 +51,7 @@ def get_google_user(access_token: str) -> GoogleUser:
     email=profile['email'],
     email_verified=profile['email_verified'],
     google_id=profile['sub'],
-    picture=profile['picture'],
+    picture=profile['picture']
   )
 
   return google_user

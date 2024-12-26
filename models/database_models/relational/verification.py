@@ -1,12 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Type
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, UUID
 from sqlalchemy.dialects.postgresql import INTEGER, TIMESTAMP, SMALLINT, BYTEA, VARCHAR
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, Mapped
 
 from database.database import TableBase
+from models.database_models.relational.identity import Identity
+from uuid import UUID as PyUUID
 
 
 class SvRequestType(Enum):
@@ -34,22 +36,22 @@ class SvRequest(TableBase):
   __tablename__ = 'verification'
   __table_args__ = {'schema': "users"}
 
-  verification_id: int = Column(INTEGER, primary_key=True, index=True, unique=True, nullable=False, autoincrement=True)
-  user_id: int = Column(INTEGER, ForeignKey('users.identity.user_id'), unique=True, nullable=False)
+  verification_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, index=True, unique=True, nullable=False, server_default='gen_random_uuid()')
+  user_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey('users.identity.user_id'), unique=True, nullable=False)
 
-  request_time: datetime = Column(TIMESTAMP, nullable=False, default="now()")
-  examine_time: datetime = Column(TIMESTAMP)
+  request_time: Mapped[datetime] = Column(TIMESTAMP, nullable=False, default="now()")
+  examine_time: Mapped[datetime] = Column(TIMESTAMP)
 
-  _request_type: int = Column('request_type', SMALLINT, nullable=False)
-  evidence: bytes = Column(BYTEA)
-  _evidence_type: int = Column('evidence_type', SMALLINT)
-  grade: int = Column(SMALLINT, nullable=False)
-  name: str = Column(VARCHAR(20), nullable=False)
-  school: str = Column(VARCHAR(50), nullable=False)
-  _state: int = Column('state', SMALLINT, nullable=False, default=0)
-  doc_code: str = Column(VARCHAR(19))
+  _request_type: Mapped[int] = Column('request_type', SMALLINT, nullable=False)
+  evidence: Mapped[bytes] = Column(BYTEA)
+  _evidence_type: Mapped[int] = Column('evidence_type', SMALLINT)
+  grade: Mapped[int] = Column(SMALLINT, nullable=False)
+  name: Mapped[str] = Column(VARCHAR(20), nullable=False)
+  school: Mapped[str] = Column(VARCHAR(50), nullable=False)
+  _state: Mapped[int] = Column('state', SMALLINT, nullable=False, default=0)
+  doc_code: Mapped[str] = Column(VARCHAR(19))
 
-  identity = relationship("Identity", backref=backref("verification", uselist=True))
+  identity: Mapped[Identity] = relationship("Identity", backref=backref("verification", uselist=True))
 
   @property
   def request_type(self):

@@ -34,7 +34,7 @@ def get_sv_request_api(
 
   log.debug('Getting SV request info. sub=\"{}\"'.format(sub))
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
@@ -75,7 +75,7 @@ def get_evidence_api(
 
   log.debug('Get SV request evidence. sub=\"{}\"'.format(sub))
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
@@ -119,7 +119,7 @@ def evaluate_sv_api(
 
   log.debug('Evaluate SV request. sub=\"{}\"'.format(sub))
 
-  if 'blink:admin' not in aud:
+  if 'root:access' not in aud:
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
