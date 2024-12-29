@@ -137,4 +137,4 @@ def evaluate_sv_api(
 
   log.debug(
     'Evaluation of SV was made. verification_id=\"{}\", judge_uid=\"{}\", state=\"{}\"'.format(body.verification_id,
-                                                                                                  sub, body.state))
+                                                                                               sub, body.state))

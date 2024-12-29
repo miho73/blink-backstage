@@ -7,6 +7,7 @@ from database.database import redis_aaguid_db
 
 log = logging.getLogger(__name__)
 
+
 def load_aaguid():
   log.debug("Flushing aaguid list from redis")
   redis_aaguid_db.flushall()
@@ -20,11 +21,13 @@ def load_aaguid():
   for key in keys:
     redis_aaguid_db.set(key, json.dumps(aaguid_json[key]))
 
+
 @dataclass
 class Authenticator:
   name: str
   icon_light: str
   icon_dark: str
+
 
 def get_authenticator(aaguid: str) -> Authenticator:
   aaguid_json = redis_aaguid_db.get(aaguid)

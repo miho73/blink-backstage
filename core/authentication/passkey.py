@@ -5,13 +5,13 @@ import os
 import uuid
 from datetime import datetime
 from typing import Type
+from uuid import UUID as PyUUID
 
 from fastapi import HTTPException
-from pydantic import UUID4
 from sqlalchemy.orm import Session
 from webauthn import generate_registration_options, generate_authentication_options, options_to_json, \
   verify_registration_response, verify_authentication_response
-from webauthn.helpers.structs import UserVerificationRequirement, AuthenticatorSelectionCriteria
+from webauthn.helpers.structs import UserVerificationRequirement
 
 from core.authentication.aaguid import get_authenticator
 from core.config import config
@@ -21,9 +21,8 @@ from models.database_models.relational.identity import Identity
 from models.database_models.relational.passkey_auth import PasskeyAuth
 from models.request_models.passkey_request import RegisterPasskeyRequest, SignInPasskeyRequest
 
-from uuid import UUID as PyUUID
-
 log = logging.getLogger(__name__)
+
 
 def begin_authentication() -> (str, dict):
   challenge = os.urandom(32)
@@ -73,6 +72,7 @@ def begin_registration(identity: Type[Identity]) -> (str, dict):
     json.loads(options_to_json(reg_option))
   )
 
+
 def add_passkey(user_id: int, request: RegisterPasskeyRequest, register_option: str, db: Session):
   identity = db.query(Identity).filter(Identity.user_id == user_id).first()
 
@@ -105,7 +105,8 @@ def add_passkey(user_id: int, request: RegisterPasskeyRequest, register_option: 
     log.debug("Authenticator not found. aaguid=\"{}\"".format(registration.aaguid))
     raise HTTPException(status_code=400, detail="Authenticator not found")
 
-  log.debug("Creating passkey auth. aaguid=\"{}\", credential_id=\"{}\"".format(registration.aaguid, registration.credential_id))
+  log.debug("Creating passkey auth. aaguid=\"{}\", credential_id=\"{}\"".format(registration.aaguid,
+                                                                                registration.credential_id))
 
   passkey_auth = PasskeyAuth(
     credential_id=registration.credential_id,
@@ -118,6 +119,7 @@ def add_passkey(user_id: int, request: RegisterPasskeyRequest, register_option: 
   db.add(passkey_auth)
   identity.auth_lookup.passkey += 1
   db.commit()
+
 
 def auth_passkey(body: SignInPasskeyRequest, PSK_AUTH_SEK: str, db: Session) -> str:
   response = body.attestation.get("response", {})
@@ -197,7 +199,6 @@ def rename_passkey(passkey_uuid, sub, name, db):
   if passkey_auth is None:
     log.debug("Passkey not found. passkey_id=\"{}\"".format(passkey_uuid))
     raise HTTPException(status_code=400, detail="Passkey not found")
-
 
   if passkey_auth.auth_lookup.identity.user_id != sub:
     log.debug("Passkey does not belong to user. passkey_id=\"{}\", user_uid=\"{}\"".format(passkey_uuid, sub))

@@ -22,6 +22,7 @@ router = APIRouter(
   tags=['authentication', 'passkey-authentication']
 )
 
+
 @router.get(
   path='/auth-option',
   summary="Get webauthn authentication options",
@@ -48,6 +49,7 @@ def get_auth_option_api():
   )
 
   return response
+
 
 @router.post(
   path='/login',
@@ -78,6 +80,7 @@ def login_passkey_api(
       'jwt': jwt
     }
   )
+
 
 @router.get(
   path='/register-option',
@@ -115,6 +118,7 @@ def get_register_option_api(
   )
   return response
 
+
 @router.post(
   path='/register',
   summary="Register webauthn passkey credential",
@@ -148,6 +152,7 @@ def register_passkey_api(
     }
   )
 
+
 @router.get(
   path='/aaguid/{theme}/{aaguid}',
   summary="Get authenticator icon by aaguid",
@@ -170,6 +175,7 @@ def get_authenticator(
       }
     }
   )
+
 
 @router.delete(
   path='/{passkey_uuid}',
@@ -204,6 +210,7 @@ def delete_passkey(
     }
   )
 
+
 @router.patch(
   path='/{passkey_uuid}',
   summary="Update passkey name",
@@ -235,4 +242,4 @@ def rename_passkey(
       'code': 200,
       'state': 'OK'
     }
-)
+  )

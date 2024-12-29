@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.school.school_access_service import get_school_list, add_school, delete_school, add_school
+from core.school.school_access_service import get_school_list, delete_school, add_school
 from database.database import create_connection
 from models.request_models.school_requests import AddSchoolRequest
 

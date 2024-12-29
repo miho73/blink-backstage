@@ -1,15 +1,17 @@
 from enum import Enum
+from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, SMALLINT
 from sqlalchemy.orm import Mapped
 
 from database.database import TableBase
-from uuid import UUID as PyUUID
+
 
 class BoardACLType(Enum):
   ROLE = 0
   ALL = 1
+
 
 class BoardACLAction(Enum):
   READ = 0
@@ -18,11 +20,13 @@ class BoardACLAction(Enum):
   MODIFY = 3
   MANAGE = 4
 
+
 class BoardACL(TableBase):
   __tablename__ = "board_acl"
   __table_args__ = {"schema": "social"}
 
-  board_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey("social.board.board_id"), primary_key=True, index=True, nullable=False)
+  board_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey("social.board.board_id"), primary_key=True,
+                                    index=True, nullable=False)
 
   _acl_type: Mapped[int] = Column("privilege_type", SMALLINT, primary_key=True, index=True, nullable=False)
   _action_code: Mapped[int] = Column("action_code", SMALLINT, primary_key=True, index=True, nullable=False)

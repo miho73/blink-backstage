@@ -130,10 +130,9 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
     )
 
     sv.identity.grade = judge.grade
-    sv.identity.role += ['core:student', 'sv:'+school.neis_code]
+    sv.identity.role += ['core:student', 'sv:' + school.neis_code]
 
     school.user_count = school.user_count + 1
-
 
 
 def withdraw_verification(sub: int, db: Session):

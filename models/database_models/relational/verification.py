@@ -1,14 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Type
+from typing import Optional
+from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, ForeignKey, UUID
-from sqlalchemy.dialects.postgresql import INTEGER, TIMESTAMP, SMALLINT, BYTEA, VARCHAR
+from sqlalchemy.dialects.postgresql import TIMESTAMP, SMALLINT, BYTEA, VARCHAR
 from sqlalchemy.orm import relationship, backref, Mapped
 
 from database.database import TableBase
 from models.database_models.relational.identity import Identity
-from uuid import UUID as PyUUID
 
 
 class SvRequestType(Enum):
@@ -36,8 +36,10 @@ class SvRequest(TableBase):
   __tablename__ = 'verification'
   __table_args__ = {'schema': "users"}
 
-  verification_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, index=True, unique=True, nullable=False, server_default='gen_random_uuid()')
-  user_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey('users.identity.user_id'), unique=True, nullable=False)
+  verification_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, index=True, unique=True,
+                                           nullable=False, server_default='gen_random_uuid()')
+  user_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey('users.identity.user_id'), unique=True,
+                                   nullable=False)
 
   request_time: Mapped[datetime] = Column(TIMESTAMP, nullable=False, default="now()")
   examine_time: Mapped[datetime] = Column(TIMESTAMP)

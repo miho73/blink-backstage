@@ -56,6 +56,7 @@ class WithdrawVerificationRequest(BaseModel):
       raise ValueError("reCAPTCHA token was not passed")
     return value
 
+
 from pydantic import BaseModel, field_validator
 
 

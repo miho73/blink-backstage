@@ -10,6 +10,7 @@ from models.database_models.relational.social.board_acl import BoardACL, BoardAC
 
 log = logging.getLogger(__name__)
 
+
 def check_privilege(
   identity: Type[Identity],
   board_id: PyUUID,
@@ -18,14 +19,14 @@ def check_privilege(
 ):
   acls: list[Type[BoardACL]] = (
     db.query(BoardACL)
-      .filter(
-        and_(
-          BoardACL.board_id == board_id,
-          BoardACL.action_code == action
-        )
+    .filter(
+      and_(
+        BoardACL.board_id == board_id,
+        BoardACL.action_code == action
       )
-      .order_by(asc(BoardACL.priority))
-      .all()
+    )
+    .order_by(asc(BoardACL.priority))
+    .all()
   )
 
   for acl in acls:

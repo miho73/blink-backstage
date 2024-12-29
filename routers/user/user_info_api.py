@@ -124,6 +124,7 @@ def get_auth_lookup_api(
     }
   )
 
+
 @router.get(
   path='/sv',
   tags=['sv'],
@@ -175,6 +176,7 @@ def get_verification_info_api(
       'school': school
     }
   )
+
 
 @router.patch(
   path='',

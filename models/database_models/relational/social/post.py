@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, ForeignKey, FetchedValue
@@ -17,7 +16,8 @@ class Post(TableBase):
   __tablename__ = "post"
   __table_args__ = {"schema": "social"}
 
-  post_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, unique=True, index=True, nullable=False, server_default="gen_random_uuid()")
+  post_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), primary_key=True, unique=True, index=True, nullable=False,
+                                   server_default="gen_random_uuid()")
 
   author_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey('users.identity.user_id'), nullable=False)
   school_id: Mapped[PyUUID] = Column(UUID(as_uuid=True), ForeignKey('school.schools.school_id'), nullable=False)

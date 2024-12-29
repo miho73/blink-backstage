@@ -7,6 +7,7 @@ from models.database_models.relational.google_auth import GoogleAuth
 from models.database_models.relational.identity import Identity
 from models.database_models.relational.password_auth import PasswordAuth
 
+
 class OAuthMethods(Enum):
   GOOGLE = "google"
   PASSWORD = "password"

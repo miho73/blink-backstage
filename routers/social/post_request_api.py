@@ -18,6 +18,7 @@ router = APIRouter(
   tags=['school']
 )
 
+
 @router.post('/post')
 async def post(
   body: UploadPostRequest,

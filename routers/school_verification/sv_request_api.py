@@ -11,7 +11,7 @@ from core.school_verification.sv_request_service import add_request, add_evidenc
 from core.user import user_info_service
 from database.database import create_connection
 from models.database_models.relational.identity import Identity
-from models.request_models.school_verification_requests import NewVerificationRequest, WithdrawVerificationRequest
+from models.request_models.school_verification_requests import NewVerificationRequest
 
 log = logging.getLogger(__name__)
 

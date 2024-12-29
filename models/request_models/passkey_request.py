@@ -8,8 +8,8 @@ class RegisterPasskeyRequest(BaseModel):
 
   model_config = ConfigDict(
     alias_generator=to_camel,
-    populate_by_name = True,
-    from_attributes = True,
+    populate_by_name=True,
+    from_attributes=True,
   )
 
   @field_validator("recaptcha", mode="before")
@@ -18,6 +18,7 @@ class RegisterPasskeyRequest(BaseModel):
     if value is None:
       raise ValueError("reCAPTCHA token was not passed")
     return value
+
 
 class SignInPasskeyRequest(BaseModel):
   attestation: dict[str, object]

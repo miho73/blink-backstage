@@ -48,7 +48,7 @@ def get_sv_requests_api(
 
 @router.delete(
   path='/requests',
-    summary="Delete SV request"
+  summary="Delete SV request"
 )
 def delete_sv_request_api(
   request: Request,
@@ -101,9 +101,10 @@ def delete_sv_request_api(
       }
     )
 
+
 @router.post(
   path='/withdraw',
-    summary="Withdraw SV request of previously been verified user"
+  summary="Withdraw SV request of previously been verified user"
 )
 def withdraw_verification_api(
   body: WithdrawVerificationRequest,

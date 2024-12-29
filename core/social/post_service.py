@@ -13,6 +13,7 @@ from models.request_models.social.post_request import UploadPostRequest
 
 log = logging.getLogger(__name__)
 
+
 def upload_post(
   sub: int,
   body: UploadPostRequest,

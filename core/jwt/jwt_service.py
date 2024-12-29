@@ -10,6 +10,7 @@ from core.config import config
 
 KST = timezone(timedelta(hours=9))
 
+
 def create_token(user_id: int, role: list[str]) -> str:
   payload = {
     'aud': role,
@@ -71,6 +72,7 @@ def validate_authentication(token: str) -> bool:
 
   return True
 
+
 def get_sub(token: dict) -> Optional[UUID]:
   sub = token.get('sub')
   if sub is None:
@@ -78,6 +80,7 @@ def get_sub(token: dict) -> Optional[UUID]:
   if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', sub):
     raise ValueError('Invalid sub as UUID')
   return UUID(sub)
+
 
 def get_aud(token: dict) -> Optional[list[str]]:
   aud = token.get('aud')
