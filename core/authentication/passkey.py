@@ -21,6 +21,8 @@ from models.database_models.relational.identity import Identity
 from models.database_models.relational.passkey_auth import PasskeyAuth
 from models.request_models.passkey_request import RegisterPasskeyRequest, SignInPasskeyRequest
 
+from uuid import UUID as PyUUID
+
 log = logging.getLogger(__name__)
 
 def begin_authentication() -> (str, dict):
@@ -45,13 +47,8 @@ def begin_authentication() -> (str, dict):
     json.loads(options_to_json(auth_option))
   )
 
-def int_to_bytes(user_id: int, length: int = 4) -> bytes:
-  return user_id.to_bytes(length, byteorder="big")
 
-def bytes_to_int(data: bytes) -> int:
-  return int.from_bytes(data, byteorder="big")
-
-def begin_registration(identity: Identity) -> (str, dict):
+def begin_registration(identity: Type[Identity]) -> (str, dict):
   challenge = os.urandom(32)
   registration_id = str(uuid.uuid4())
   if redis_db.exists(registration_id):
@@ -63,7 +60,7 @@ def begin_registration(identity: Identity) -> (str, dict):
     rp_name=config['security']['webauthn']['rp_name'],
     challenge=challenge,
     user_name=identity.username,
-    user_id=int_to_bytes(identity.user_id),
+    user_id=identity.user_id.bytes,
     user_display_name=identity.username,
     timeout=300,
   )
@@ -175,15 +172,15 @@ def auth_passkey(body: SignInPasskeyRequest, PSK_AUTH_SEK: str, db: Session) -> 
   return jwt
 
 
-def delete_passkey(passkey_uuid: str, sub: int, db: Session):
-  uuid = UUID4(passkey_uuid)
+def delete_passkey(passkey_uuid: str, sub: PyUUID, db: Session):
+  uuid = PyUUID(passkey_uuid)
   passkey_auth = db.query(PasskeyAuth).filter(PasskeyAuth.passkey_id == uuid).first()
 
   if passkey_auth is None:
     log.debug("Passkey not found. passkey_id=\"{}\"".format(passkey_uuid))
     raise HTTPException(status_code=400, detail="Passkey not found")
 
-  if passkey_auth.auth_lookup.identity.user_id != int(sub):
+  if passkey_auth.auth_lookup.identity.user_id != sub:
     log.debug("Passkey does not belong to user. passkey_id=\"{}\", user_uid=\"{}\"".format(passkey_uuid, sub))
     raise HTTPException(status_code=400, detail="Passkey not found")
 
@@ -194,7 +191,7 @@ def delete_passkey(passkey_uuid: str, sub: int, db: Session):
 
 
 def rename_passkey(passkey_uuid, sub, name, db):
-  uuid = UUID4(passkey_uuid)
+  uuid = PyUUID(passkey_uuid)
   passkey_auth = db.query(PasskeyAuth).filter(PasskeyAuth.passkey_id == uuid).first()
 
   if passkey_auth is None:
@@ -202,7 +199,7 @@ def rename_passkey(passkey_uuid, sub, name, db):
     raise HTTPException(status_code=400, detail="Passkey not found")
 
 
-  if passkey_auth.auth_lookup.identity.user_id != int(sub):
+  if passkey_auth.auth_lookup.identity.user_id != sub:
     log.debug("Passkey does not belong to user. passkey_id=\"{}\", user_uid=\"{}\"".format(passkey_uuid, sub))
     raise HTTPException(status_code=400, detail="Passkey not found")
 

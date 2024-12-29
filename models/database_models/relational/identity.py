@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import EmailStr
 from sqlalchemy import Column, ForeignKey, UUID
@@ -23,6 +24,6 @@ class Identity(TableBase):
   join_date: Mapped[datetime] = Column(TIMESTAMP, nullable=False, default="now()")
   last_login: Mapped[datetime] = Column(TIMESTAMP)
 
-  grade: Mapped[int] = Column(SMALLINT)
+  grade: Mapped[Optional[int]] = Column(SMALLINT)
   role: Mapped[list[str]] = Column(MutableList.as_mutable(ARRAY(VARCHAR(45))), nullable=False, default=['core:user'])
 

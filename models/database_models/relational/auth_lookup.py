@@ -17,6 +17,6 @@ class AuthLookup(TableBase):
 
   google: Mapped[bool] = Column(BOOLEAN, nullable=False, server_default=FetchedValue())
   password: Mapped[bool] = Column(BOOLEAN, nullable=False, server_default=FetchedValue())
-  passkey: Mapped[bool] = Column(SMALLINT, nullable=False, server_default=FetchedValue())
+  passkey: Mapped[int] = Column(SMALLINT, nullable=False, server_default=FetchedValue())
 
   identity: Mapped[Identity] = relationship("Identity", uselist=False, backref=backref("auth_lookup", uselist=False))

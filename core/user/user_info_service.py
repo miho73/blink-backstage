@@ -1,5 +1,5 @@
 import logging
-from typing import Type
+from typing import Type, Optional
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -38,3 +38,15 @@ def update_user_profile(uid: int, request: UpdateUserProfileRequest, db: Session
   current_identity.username = request.username
 
   db.commit()
+
+def role_to_school(roles: list[str]) -> (bool, Optional[str]):
+  student_verified: bool = False
+  neis_code = None
+
+  for role in roles:
+    if role == 'core:student':
+      student_verified = True
+    elif role.startswith('sv:'):
+      neis_code = role.split(':')[1]
+
+  return student_verified, neis_code

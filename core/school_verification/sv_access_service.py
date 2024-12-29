@@ -56,8 +56,8 @@ def access_get_sv(db: Session, **kwargs):
       raise HTTPException(status_code=500, detail='Database integrity')
 
     res.append({
-      'verificationId': sv.verification_id,
-      'userId': sv.user_id,
+      'verificationId': str(sv.verification_id),
+      'userId': str(sv.user_id),
       'requestTime': sv.request_time.isoformat(),
       'evidence': sv.evidence is not None,
       'grade': sv.grade,

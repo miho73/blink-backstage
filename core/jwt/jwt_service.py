@@ -1,5 +1,7 @@
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from uuid import UUID
 
 import jwt
 from jwt import InvalidTokenError
@@ -69,11 +71,13 @@ def validate_authentication(token: str) -> bool:
 
   return True
 
-def get_sub(token: dict) -> Optional[int]:
+def get_sub(token: dict) -> Optional[UUID]:
   sub = token.get('sub')
   if sub is None:
     return None
-  return int(sub)
+  if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', sub):
+    raise ValueError('Invalid sub as UUID')
+  return UUID(sub)
 
 def get_aud(token: dict) -> Optional[list[str]]:
   aud = token.get('aud')

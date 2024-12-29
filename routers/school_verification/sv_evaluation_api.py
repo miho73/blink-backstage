@@ -1,4 +1,5 @@
 import logging
+import re
 
 from fastapi import APIRouter, Depends, Request, HTTPException, Response
 from fastapi.params import Security
@@ -44,7 +45,11 @@ def get_sv_request_api(
     log.debug('Verification id was not given.')
     raise HTTPException(status_code=400, detail='vid was not given')
 
-  detail = get_sv_request_detail(int(vid), db)
+  if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', vid):
+    log.debug('Verification id is not a valid UUID. vid=\"{}\"'.format(vid))
+    raise HTTPException(status_code=400, detail='Invalid vid')
+
+  detail = get_sv_request_detail(vid, db)
 
   return JSONResponse(
     content={
@@ -85,7 +90,11 @@ def get_evidence_api(
     log.debug('Verification id was not given.')
     raise HTTPException(status_code=400, detail='vid was not given')
 
-  (e_type, e) = get_evidence(int(vid), db)
+  if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', vid):
+    log.debug('Verification id is not a valid UUID. vid=\"{}\"'.format(vid))
+    raise HTTPException(status_code=400, detail='Invalid vid')
+
+  (e_type, e) = get_evidence(vid, db)
 
   if e_type is SvEvidenceType.PDF:
     c_type = 'application/pdf'

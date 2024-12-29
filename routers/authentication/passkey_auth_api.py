@@ -10,6 +10,7 @@ from core.authentication import passkey
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.config import config
 from core.google.recaptcha_service import verify_recaptcha
+from core.jwt.jwt_service import get_sub
 from core.user import user_info_service
 from database.database import create_connection
 from models.request_models.passkey_request import RegisterPasskeyRequest, SignInPasskeyRequest
@@ -192,7 +193,7 @@ def delete_passkey(
     raise HTTPException(status_code=400, detail="Recaptcha verification failed")
 
   token = authorize_jwt(jwt)
-  sub = token.get("sub")
+  sub = get_sub(token)
 
   passkey.delete_passkey(passkey_uuid, sub, db)
 
@@ -216,7 +217,7 @@ def rename_passkey(
   log.debug("User requested passkey renaming. passkey_uuid=\"{}\"".format(passkey_uuid))
 
   token = authorize_jwt(jwt)
-  sub = token.get("sub")
+  sub = get_sub(token)
   name = body['name']
 
   if name is None:

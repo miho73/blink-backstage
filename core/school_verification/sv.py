@@ -1,12 +1,14 @@
 import logging
 from datetime import datetime
+from typing import Type
 from urllib import parse
+from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from core.user.user_info_service import get_identity_by_userid
+from core.user.user_info_service import get_identity_by_userid, role_to_school
 from models.database_models.relational.identity import Identity
 from models.database_models.relational.schools import School
 from models.database_models.relational.verification import SvRequest, SvState
@@ -15,7 +17,9 @@ from models.request_models.school_verification_requests import SvEvaluation
 log = logging.getLogger(__name__)
 
 
-def get_sv_request_detail(vid: int, db: Session) -> dict:
+def get_sv_request_detail(vid_str: str, db: Session) -> dict:
+  vid = UUID(vid_str)
+
   r = (
     db.query(SvRequest)
     .filter_by(verification_id=vid)
@@ -48,8 +52,8 @@ def get_sv_request_detail(vid: int, db: Session) -> dict:
     raise HTTPException(status_code=500, detail='Database integrity')
 
   return {
-    'verificationId': r.verification_id,
-    'userId': r.user_id,
+    'verificationId': str(r.verification_id),
+    'userId': str(r.user_id),
     'requestTime': r.request_time.isoformat(),
     'state': state,
     'evidenceType': r.evidence_type is not None and r.evidence_type.value or None,
@@ -73,7 +77,7 @@ def get_request_list(user_id: int, db: Session) -> list[dict]:
 
   for r in q:
     ret.append({
-      'vid': r.verification_id,
+      'vid': str(r.verification_id),
       'state': r.state.value,
       'evidenceType': r.evidence_type is not None and r.evidence_type.value or None,
       'docCode': r.doc_code,
@@ -87,7 +91,9 @@ def get_request_list(user_id: int, db: Session) -> list[dict]:
   return ret
 
 
-def get_evidence(vid: int, db: Session):
+def get_evidence(vid_str: str, db: Session):
+  vid = UUID(vid_str)
+
   request = (
     db.query(SvRequest)
     .filter_by(verification_id=vid)
@@ -102,9 +108,11 @@ def get_evidence(vid: int, db: Session):
 
 
 def evaluate_sv(judge: SvEvaluation, db: Session):
+  vid = UUID(judge.verification_id)
+
   sv = (
     db.query(SvRequest)
-    .filter_by(verification_id=judge.verification_id)
+    .filter_by(verification_id=vid)
     .first()
   )
 
@@ -115,27 +123,34 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
   sv._state = judge.state
   sv.examine_time = datetime.now()
   if judge.state is SvState.ACCEPTED.value:
-    sv.identity.grade = judge.grade
-    sv.identity.role += ['core:student', 'sv:'+str(judge.verification_id)]
-
     school = (
       db.query(School)
       .filter_by(school_id=judge.school_id)
       .first()
     )
 
+    sv.identity.grade = judge.grade
+    sv.identity.role += ['core:student', 'sv:'+school.neis_code]
+
     school.user_count = school.user_count + 1
 
 
 
 def withdraw_verification(sub: int, db: Session):
-  identity: Identity = get_identity_by_userid(sub, db)
+  identity: Type[Identity] = get_identity_by_userid(sub, db)
 
-  if identity.school is None:
+  student_verified, neis_code = role_to_school(identity.role)
+
+  if not student_verified:
     log.debug('User is not verified. user_uid=\"{}\"'.format(sub))
     raise HTTPException(status_code=400, detail="User not verified")
 
-  identity.school.user_count = identity.school.user_count - 1
-  identity.school_id = None
+  school = (
+    db.query(School)
+    .filter_by(neis_code=neis_code)
+    .first()
+  )
+
+  school.user_count = school.user_count - 1
+  identity.role.remove('core:student')
   identity.grade = None
-  identity.student_verified = False

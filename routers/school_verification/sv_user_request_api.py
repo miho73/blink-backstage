@@ -1,4 +1,6 @@
 import logging
+import re
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Security, Request, HTTPException
 from sqlalchemy import delete
@@ -60,21 +62,23 @@ def delete_sv_request_api(
     log.debug("Request ID or reCAPTCHA token was not found in headers")
     raise HTTPException(status_code=400, detail="Invalid Request")
 
+  if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', vid):
+    log.debug("Request ID is not a valid UUID. request_id=\"{}\"".format(vid))
+    raise HTTPException(status_code=400, detail="Invalid Resource ID as UUID")
+
   # google recaptcha
   if verify_recaptcha(token, request.client.host, "sv/delete") is False:
     log.debug("Recaptcha delete school verification failed")
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
-  vd = int(vid)
-
   token = authorize_jwt(jwt)
   sub = token.get("sub")
 
-  log.debug("Deleting school verification request. sub=\"{}\". request_id=\"{}\"".format(sub, vd))
+  log.debug("Deleting school verification request. sub=\"{}\". request_id=\"{}\"".format(sub, vid))
 
   result = db.execute(
     delete(SvRequest)
-    .where(SvRequest.verification_id == vd)
+    .where(SvRequest.verification_id == UUID(vid))
     .where(SvRequest.user_id == sub)
   )
 
@@ -82,13 +86,13 @@ def delete_sv_request_api(
 
   if affected != 1:
     log.debug(
-      "Delete request was not normally performed. sub=\"{}\". request_id=\"{}\". affected=\"{}\"".format(sub, vd,
+      "Delete request was not normally performed. sub=\"{}\". request_id=\"{}\". affected=\"{}\"".format(sub, vid,
                                                                                                          affected))
     raise HTTPException(status_code=400, detail="Abnormal")
 
   else:
     db.commit()
-    log.debug("Delete request was succeed. sub=\"{}\". request_id=\"{}\"".format(sub, vd))
+    log.debug("Delete request was succeed. sub=\"{}\". request_id=\"{}\"".format(sub, vid))
 
     return JSONResponse(
       content={

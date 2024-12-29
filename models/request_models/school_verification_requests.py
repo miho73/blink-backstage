@@ -60,9 +60,9 @@ from pydantic import BaseModel, field_validator
 
 
 class SvEvaluation(BaseModel):
-  verification_id: int
+  verification_id: str
   state: int
-  school_id: int
+  school_id: str
   grade: int
 
   class Config:
@@ -76,4 +76,25 @@ class SvEvaluation(BaseModel):
   def validate_state(cls, value):
     if value < 2 or value > 7:
       raise ValueError("State must be one of 2, 3, 4, 5, 6, 7")
+    return value
+
+  @field_validator("school_id", mode="before")
+  @classmethod
+  def validate_school_id(cls, value):
+    if not re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', value):
+      raise ValueError("School ID is invalid as uuid")
+    return value
+
+  @field_validator("grade", mode="before")
+  @classmethod
+  def validate_grade(cls, value):
+    if value < 1 or value > 3:
+      raise ValueError("Grade must be one of 1, 2, 3")
+    return value
+
+  @field_validator("verification_id", mode="before")
+  @classmethod
+  def validate_verification_id(cls, value):
+    if not re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', value):
+      raise ValueError("Verification ID is invalid as uuid")
     return value
