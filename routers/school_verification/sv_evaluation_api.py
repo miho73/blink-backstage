@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.school_verification.sv import get_sv_request_detail, get_evidence, evaluate_sv
+from core.user.user_info_service import check_role
 from database.database import create_connection
 from models.database_models.relational.verification import SvEvidenceType
 from models.request_models.school_verification_requests import SvEvaluation
@@ -35,7 +36,7 @@ def get_sv_request_api(
 
   log.debug('Getting SV request info. sub=\"{}\"'.format(sub))
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:read_sv_reqs'):
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
@@ -80,7 +81,7 @@ def get_evidence_api(
 
   log.debug('Get SV request evidence. sub=\"{}\"'.format(sub))
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:read_sv_reqs'):
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
@@ -128,7 +129,7 @@ def evaluate_sv_api(
 
   log.debug('Evaluate SV request. sub=\"{}\"'.format(sub))
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:eval_sv_reqs'):
     log.debug('User is not an admin. user_id=\"{}\"'.format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 

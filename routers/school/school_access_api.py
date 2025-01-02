@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
+from core.jwt.jwt_service import get_aud
 from core.school.school_access_service import get_school_list, delete_school, add_school
+from core.user.user_info_service import check_role
 from database.database import create_connection
 from models.request_models.school_requests import AddSchoolRequest
 
@@ -29,10 +31,11 @@ def add_school_api(
 ):
   token = authorize_jwt(jwt)
   sub = token.get("sub")
+  aud = get_aud(token)
 
   log.debug("Adding school. sub=\"{}\"".format(sub))
 
-  if 'root:access' not in token['aud']:
+  if not check_role(aud, 'root:add_school'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
 
@@ -64,7 +67,7 @@ def get_school_list_api(
 
   school_name = request.query_params.get('schoolName')
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:list_school'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     return JSONResponse(
       status_code=403,
@@ -109,7 +112,7 @@ def deletes_school_api(
 
   school_uid = request.headers.get('School-Uid')
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:delete_school'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail="Forbidden")
 

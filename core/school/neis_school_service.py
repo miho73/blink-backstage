@@ -1,9 +1,12 @@
 import logging
+from typing import Type
 
 import requests
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 from core.config import config
+from models.database_models.relational.schools import School
 
 log = logging.getLogger(__name__)
 
@@ -49,3 +52,11 @@ def query_school_info(school_name: str) -> list[dict]:
     })
 
   return ret
+
+def db_neis_to_school(neis_code: str, db: Session) -> Type[School] | None:
+  school = db.query(School).filter(School.neis_code == neis_code).first()
+
+  if school is None:
+    return None
+
+  return school

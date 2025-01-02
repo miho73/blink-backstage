@@ -54,3 +54,11 @@ def role_to_school(roles: list[str]) -> (bool, Optional[str]):
       neis_code = role.split(':')[1]
 
   return student_verified, neis_code
+
+def check_role(aud: list[str], role: str) -> bool:
+  if 'root:superuser' in aud:
+    return True
+  elif role in aud:
+    return True
+  log.debug("User does not have permission to add boards. required=\"{}\", user=\"{}\"".format(role, aud))
+  return False

@@ -6,6 +6,7 @@ from starlette.responses import JSONResponse
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.jwt.jwt_service import get_sub, get_aud
 from core.school.neis_school_service import query_school_info
+from core.user.user_info_service import check_role
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def query_neis_school(
   school_name = request.query_params.get('schoolName')
 
   log.debug(aud)
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:neis_api'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(token.get('sub')))
     raise HTTPException(status_code=403, detail="Forbidden")
 

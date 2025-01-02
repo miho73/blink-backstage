@@ -7,6 +7,7 @@ from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.school_verification.sv_access_service import access_get_sv
+from core.user.user_info_service import check_role
 from database.database import create_connection
 
 log = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ def get_sv_list(
 
   log.debug("Getting sv list. sub=\"{}\"".format(sub))
 
-  if 'root:access' not in aud:
+  if not check_role(aud, 'root:read_sv_reqs'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(sub))
     raise HTTPException(status_code=403, detail='Forbidden')
 
