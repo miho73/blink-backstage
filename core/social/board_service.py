@@ -104,3 +104,18 @@ def create_board(
 
   db.commit()
   return new_board.board_id
+
+
+def get_board(
+  board_id: PyUUID,
+  db: Session
+):
+  board: Type[Board] = db.query(Board).filter(Board.board_id == board_id).first()
+
+  if board is None:
+    return None
+
+  return {
+    'id': str(board.board_id),
+    'name': board.name
+  }

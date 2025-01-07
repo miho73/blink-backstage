@@ -152,4 +152,5 @@ def withdraw_verification(sub: int, db: Session):
 
   school.user_count = school.user_count - 1
   identity.role.remove('core:student')
+  identity.role.remove('sv:' + school.neis_code)
   identity.grade = None
