@@ -11,6 +11,7 @@ from core.authentication.authorization_service import authorization_header, auth
 from core.social import board_service, check_acl
 from core.social.board_service import check_acl_by_aud
 from core.user.user_info_service import check_role
+from core.validation import validate_all, length_check
 from database.database import create_connection
 from models.database_models.relational.social.board_acl import BoardACL, BoardACLAction
 from models.request_models.social.board_request import CreateBoardRequest
@@ -84,3 +85,37 @@ async def get_board(
         'board': board
       }
     )
+  else:
+    raise HTTPException(403, "User does not have permission to read this board")
+
+@router.get(
+  path="",
+  description="Get board by its name",
+)
+def get_board_by_name(
+  name: str,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.debug(f"Getting board. board_name=\"{name}\"")
+
+  token = authorize_jwt(jwt)
+  aud = token.get("aud")
+
+  if name is None:
+    raise HTTPException(400, "name is required")
+  if validate_all(
+    length_check(name, 1, 512)
+  ):
+    raise HTTPException(400, "name is too long or too short")
+
+  board = board_service.get_board_by_name(name, aud, db)
+
+  return JSONResponse(
+    status_code=200,
+    content={
+      'code': 200,
+      'state': 'OK',
+      'board': board
+    }
+  )

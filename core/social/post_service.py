@@ -3,6 +3,7 @@ import uuid
 from typing import Type
 
 from fastapi import HTTPException
+from sqlalchemy import exists
 from sqlalchemy.orm import Session
 
 from core.school import neis_school_service
@@ -111,14 +112,55 @@ def complete_edit(
   db.commit()
 
 
-def get_posts(aud, board_id, db):
+def get_posts(
+  aud: [str],
+  board_id: PyUUID,
+  head: PyUUID,
+  db: Session
+):
   if check_acl_by_aud(aud, board_id, BoardACLAction.READ, db):
-    return (
-      db.query(Post).filter(Post.board_id == board_id)
-        .order_by(Post.write_time.desc())
-        .limit(10)
-        .all()
-    )
+    if head is None:
+      return (
+        db.query(Post)
+          .filter(Post.board_id == board_id)
+          .order_by(Post.write_time.desc())
+          .limit(10)
+          .all()
+      )
+    else:
+      criterion_exists = (
+        db.query(
+          exists()
+            .where(
+              Post.post_id == head,
+              Post.board_id == board_id
+            )
+        )
+        .scalar()
+      )
+
+      if criterion_exists is False:
+        raise ValueError(f"No post found with post_id={head}")
+
+      write_time = (
+        db.query(Post.write_time)
+          .filter(
+            Post.post_id == head,
+            Post.board_id == board_id
+          )
+          .scalar_subquery()
+      )
+
+      return (
+        db.query(Post)
+          .filter(
+            Post.board_id == board_id,
+            Post.write_time < write_time
+          )
+          .order_by(Post.write_time.desc())
+          .limit(10)
+          .all()
+      )
 
   raise HTTPException(403, "User does not have permission to list this board")
 

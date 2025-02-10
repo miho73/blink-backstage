@@ -2,6 +2,7 @@ import logging
 from typing import Type
 from uuid import UUID as PyUUID
 
+from fastapi import HTTPException
 from sqlalchemy import asc, and_
 from sqlalchemy.orm import Session
 
@@ -115,6 +116,27 @@ def get_board(
   if board is None:
     return None
 
+  return {
+    'id': str(board.board_id),
+    'name': board.name
+  }
+
+
+def get_board_by_name(
+  name: str,
+  aud: list[str],
+  db: Session
+):
+  board: Type[Board] = db.query(Board).filter(Board.name == name).first()
+
+  if board is None:
+    return None
+
+  if not check_acl_by_aud(aud, board.board_id, BoardACLAction.READ, db):
+    log.debug(f"User does not have permission to read this board. board_id=\"{board.board_id}\"")
+    raise HTTPException(403, "User does not have permission to read this board")
+
+  log.debug(f"Board found. board_id=\"{board.board_id}\"")
   return {
     'id': str(board.board_id),
     'name': board.name

@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.jwt.jwt_service import get_sub, get_aud
 from core.social import post_service
+from core.validation import regex_check
 from database.database import create_connection
 from models.request_models.social.post_request import UploadPostRequest, UpdatePostRequest
 
@@ -100,15 +101,26 @@ async def edit(
 )
 async def get(
   board_id: str,
+  head: str | None = '',
   jwt: str = Security(authorization_header),
-  db: Session = Depends(create_connection),
+  db: Session = Depends(create_connection)
 ):
   log.info("Listing posts. board_id=\"{board_id}\"".format(board_id=board_id))
 
   token = authorize_jwt(jwt)
   aud = get_aud(token)
 
-  posts = post_service.get_posts(aud, board_id, db)
+  if regex_check(board_id, r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'):
+    board_uuid = UUID(board_id)
+  else:
+    raise ValueError("Invalid board_id")
+
+  begin_uuid = None
+  if regex_check(head, r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'):
+    log.debug("Query posts from board. board_id=\"{board_id}\", head=\"{head}\"".format(board_id=board_id, head=head))
+    begin_uuid = UUID(head)
+
+  posts = post_service.get_posts(aud, board_uuid, begin_uuid, db)
   response = []
   for post in posts:
     response.append({
@@ -143,6 +155,7 @@ async def get_post(
   log.info("Getting post. post_id=\"{post_id}\"".format(post_id=post_id))
 
   token = authorize_jwt(jwt)
+  sub = get_sub(token)
   aud = get_aud(token)
 
   post = post_service.get_post(aud, UUID(post_id), db)
@@ -156,6 +169,7 @@ async def get_post(
         "title": post.title,
         "content": post.content,
         "images": post.images,
+        "author": post.author_id == sub,
         "edited": post.edited,
         "writeTime": post.write_time.isoformat(),
         "schoolName": post.school.school_name,
