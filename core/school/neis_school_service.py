@@ -92,6 +92,7 @@ def get_meal_data(neis_code: str) -> dict:
     raise HTTPException(status_code=500, detail="NEIS API error")
 
   if 'mealServiceDietInfo' not in response.json():
+    log.debug('NEIS API returned empty meal data. result won\'t be cached. neis_code={}'.format(neis_code))
     return {}
 
   log.debug(response.json())
