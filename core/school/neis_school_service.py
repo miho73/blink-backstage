@@ -83,7 +83,7 @@ def get_meal_data(neis_code: str) -> dict:
       'Type': 'json',
       'ATPT_OFCDC_SC_CODE': neis_code[:3],
       'SD_SCHUL_CODE': neis_code[3:],
-      'MLSV_YMD': '20240912'
+      'MLSV_YMD': today
     }
   )
 
