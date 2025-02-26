@@ -31,7 +31,6 @@ def query_neis_school(
 
   school_name = request.query_params.get('schoolName')
 
-  log.debug(aud)
   if not check_role(aud, 'root:neis_api'):
     log.debug("User is not an admin. user_uid=\"{}\"".format(token.get('sub')))
     raise HTTPException(status_code=403, detail="Forbidden")

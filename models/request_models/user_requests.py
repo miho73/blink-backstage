@@ -23,3 +23,13 @@ class UpdateUserProfileRequest(BaseModel):
     if not re.match(r'^[-\w.]+@([-\w]+\.)+[-\w]{2,4}$', value):
       raise ValueError("Email regex check failed")
     return value
+
+class UpdateUserAllergyInformationRequest(BaseModel):
+  allergy: int
+
+  @field_validator("allergy", mode="before")
+  @classmethod
+  def validate_allergy(cls, value):
+    if value != 0 and (value < 2 or value > 524287):
+      raise ValueError("Allergy code out of range")
+    return value

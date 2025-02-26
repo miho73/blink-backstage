@@ -164,7 +164,8 @@ def get_verification_info_api(
   if student_verified:
     school = {
       "name": school.school_name,
-      "id": str(school.school_id),
+      "schoolUUID": str(school.school_id),
+      "neisCode": school.neis_code,
       "grade": identity.grade
     }
   else:

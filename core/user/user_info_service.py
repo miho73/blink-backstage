@@ -1,5 +1,6 @@
 import logging
 from typing import Type, Optional
+from uuid import UUID
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -10,7 +11,7 @@ from models.request_models.user_requests import UpdateUserProfileRequest
 log = logging.getLogger(__name__)
 
 
-def get_identity_by_userid(user_id: int, db: Session) -> Type[Identity] | None:
+def get_identity_by_userid(user_id: UUID, db: Session) -> Type[Identity] | None:
   identity = db.query(Identity).filter(Identity.user_id == user_id).first()
 
   if identity is None:
@@ -19,7 +20,7 @@ def get_identity_by_userid(user_id: int, db: Session) -> Type[Identity] | None:
   return identity
 
 
-def update_user_profile(uid: int, request: UpdateUserProfileRequest, db: Session):
+def update_user_profile(uid: UUID, request: UpdateUserProfileRequest, db: Session):
   identity = get_identity_by_userid(uid, db)
 
   if identity is None:

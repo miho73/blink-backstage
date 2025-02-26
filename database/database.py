@@ -42,3 +42,11 @@ redis_aaguid_db = redis.Redis(
   db=1,
   decode_responses=True
 )
+
+meal_cache_db = redis.Redis(
+  host=config['database']["redis"]["host"],
+  port=config['database']["redis"]["port"],
+  password=config['database']["redis"]["password"],
+  db=2,
+  decode_responses=True
+)

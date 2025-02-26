@@ -10,6 +10,7 @@ from models.database_models.relational.auth_lookup import AuthLookup
 from models.database_models.relational.google_auth import GoogleAuth
 from models.database_models.relational.identity import Identity
 from models.database_models.relational.password_auth import PasswordAuth
+from models.database_models.relational.user_preference import UserPreference
 from models.request_models.register_requests import GoogleRegisterRequest, PasswordRegisterRequest
 from models.user import GoogleUser
 
@@ -44,7 +45,12 @@ def add_google_user(request: GoogleRegisterRequest, db: Session):
     auth_lookup=auth_lookup
   )
 
+  user_preference: UserPreference = UserPreference(
+    identity=identity
+  )
+
   db.add(google_auth)
+  db.add(user_preference)
   log.debug("Added new google user to database. google_sub=\"{}\"".format(google_user.google_id))
 
 
@@ -67,4 +73,9 @@ def add_password_user(request: PasswordRegisterRequest, db: Session):
     auth_lookup=auth_lookup
   )
 
+  user_preference: UserPreference = UserPreference(
+    identity=identity
+  )
+
   db.add(password_method)
+  db.add(user_preference)
