@@ -112,7 +112,7 @@ def get_meal_data(neis_code: str) -> dict:
     ret[key] = {
       'diet': diet_list,
       'nutrients': nutrient_list,
-      'calories': serve['CAL_INFO'][1:-5],
+      'calories': serve['CAL_INFO'][0:-5],
     }
 
   now = datetime.now()
