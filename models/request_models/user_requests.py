@@ -1,6 +1,8 @@
 import re
+from typing import Optional
 
-from pydantic import BaseModel, field_validator, EmailStr
+from pydantic import BaseModel, field_validator, EmailStr, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class UpdateUserProfileRequest(BaseModel):
@@ -32,4 +34,32 @@ class UpdateUserAllergyInformationRequest(BaseModel):
   def validate_allergy(cls, value):
     if value != 0 and (value < 2 or value > 524287):
       raise ValueError("Allergy code out of range")
+    return value
+
+class UpdateClassroomSNumberRequest(BaseModel):
+  classroom: Optional[int]
+  student_number: Optional[int]
+
+  model_config = ConfigDict(
+    alias_generator=to_camel,
+    populate_by_name=True,
+    from_attributes=True,
+  )
+
+  @field_validator("classroom", mode="before")
+  @classmethod
+  def validate_classroom_s_number(cls, value):
+    if value is None:
+      return None
+    if value < 1 or value > 30:
+      raise ValueError("Classroom out of range")
+    return value
+
+  @field_validator("student_number", mode="before")
+  @classmethod
+  def validate_student_number(cls, value):
+    if value is None:
+      return None
+    if value < 1 or value > 50:
+      raise ValueError("Student number out of range")
     return value

@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.google.recaptcha_service import verify_recaptcha
 from core.user import user_info_service
-from core.user.user_info_service import update_user_profile, role_to_school
+from core.user.user_info_service import update_user_profile, role_to_school, update_classroom_and_snumber
 from database.database import create_connection
 from models.database_models.relational.auth_lookup import AuthLookup
 from models.database_models.relational.google_auth import GoogleAuth
@@ -16,7 +16,7 @@ from models.database_models.relational.identity import Identity
 from models.database_models.relational.passkey_auth import PasskeyAuth
 from models.database_models.relational.password_auth import PasswordAuth
 from models.database_models.relational.schools import School
-from models.request_models.user_requests import UpdateUserProfileRequest
+from models.request_models.user_requests import UpdateUserProfileRequest, UpdateClassroomSNumberRequest
 
 log = logging.getLogger(__name__)
 
@@ -166,7 +166,9 @@ def get_verification_info_api(
       "name": school.school_name,
       "schoolUUID": str(school.school_id),
       "neisCode": school.neis_code,
-      "grade": identity.grade
+      "grade": identity.grade,
+      "classroom": identity.classroom,
+      "studentNumber": identity.student_number,
     }
   else:
     school = None
@@ -200,6 +202,30 @@ def update_user_api(
 
   update_user_profile(sub, body, db)
   log.debug("User information updated. user_uid=\"{}\"".format(sub))
+
+  return JSONResponse(
+    content={
+      "code": 200,
+      "state": "OK"
+    }
+  )
+
+@router.patch(
+  path='/school',
+  summary="Update classroom and student number information",
+)
+def update_classroom_snumber(
+  body: UpdateClassroomSNumberRequest,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  token = authorize_jwt(jwt)
+  sub = token.get("sub")
+
+  log.debug("Updating classroom and student number information. user_uid=\"{}\", new_classroom=\"{}\", new_snumber=\"{}\"".format(sub, body.classroom, body.student_number))
+
+  update_classroom_and_snumber(sub, body, db)
+  log.debug("Classroom and student number information updated. user_uid=\"{}\"".format(sub))
 
   return JSONResponse(
     content={

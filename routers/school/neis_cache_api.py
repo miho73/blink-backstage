@@ -52,3 +52,14 @@ def get_cached_meal_data(
       'allergy': allergy_pref
     }
   )
+
+@router.get(
+  path='/timetable',
+  description='Get cached timetable data from NEIS API'
+)
+def get_cached_timetable_data(
+  request: Request,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  pass
