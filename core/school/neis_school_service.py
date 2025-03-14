@@ -1,13 +1,15 @@
 import json
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from typing import Type
+from uuid import UUID
 
 import requests
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from core.config import config
+from core.user.user_info_service import get_identity_by_userid, role_to_school
 from database.database import meal_cache_db
 from models.database_models.relational.schools import School
 
@@ -15,7 +17,12 @@ log = logging.getLogger(__name__)
 
 SCHOOL_INFO_URL = config['api']['neis']['school_info']
 MEAL_INFO_URL = config['api']['neis']['meal_info']
+SCHOOL_TIMETABLE_URL = config['api']['neis']['high_school_timetable_info']
 API_KEY = config['api']['neis']['key']
+
+today = datetime.today()
+FIRST_DATE_OF_WEEK = today - timedelta(days=today.weekday())
+LAST_DATE_OF_WEEK = FIRST_DATE_OF_WEEK + timedelta(days=4) # TODO: CHANGE CACHED DATE EVERYDAY
 
 
 def query_school_info(school_name: str) -> list[dict]:
@@ -95,7 +102,6 @@ def get_meal_data(neis_code: str) -> dict:
     log.debug('NEIS API returned empty meal data. result won\'t be cached. neis_code={}'.format(neis_code))
     return {}
 
-  log.debug(response.json())
   jsn = response.json()['mealServiceDietInfo'][1]['row']
   ret = {}
 
@@ -126,3 +132,80 @@ def get_meal_data(neis_code: str) -> dict:
   log.debug('meal cache set. neis_code={}, ttl={}'.format(neis_code, remaining_time))
 
   return ret
+
+def get_timetable_data(
+  uid: UUID,
+  db: Session
+) -> dict:
+  # TODO: split logic when the school is middle school
+  log.debug('requesting timetable API. uid={}'.format(uid))
+
+  identity = get_identity_by_userid(uid, db)
+  if identity is None:
+    raise HTTPException(status_code=404, detail='User not found')
+
+  student_verified, neis_code = role_to_school(identity.role)
+
+  if not student_verified:
+    raise HTTPException(status_code=403, detail='User is not a student')
+
+  school = db_neis_to_school(neis_code, db)
+  if school is None:
+    raise HTTPException(status_code=404, detail='School not found')
+
+  grade = identity.grade
+  classroom = identity.classroom
+  if classroom is None:
+    raise HTTPException(status_code=400, detail='Classroom not set')
+
+  log.debug("requesting NEIS timetable API. neis_code={}, grade={}, classroom={}".format(neis_code, grade, classroom))
+  response = requests.get(
+    url=SCHOOL_TIMETABLE_URL,
+    params={
+      'KEY': API_KEY,
+      'Type': 'json',
+      'ATPT_OFCDC_SC_CODE': neis_code[:3],
+      'SD_SCHUL_CODE': neis_code[3:],
+      'GRADE': grade,
+      'CLASS_NM': classroom,
+      'TI_FROM_YMD': FIRST_DATE_OF_WEEK.strftime('%Y%m%d'),
+      'TI_TO_YMD': LAST_DATE_OF_WEEK.strftime('%Y%m%d'),
+    }
+  )
+
+  if response.status_code != 200:
+    log.debug("NEIS timetable API error. status_code={}".format(response.status_code))
+    raise HTTPException(status_code=500, detail="NEIS API error")
+
+  log.debug(response.json())
+  if 'hisTimetable' not in response.json():
+    log.debug("request field \'hisTimetable\' does not exists in API response")
+    raise HTTPException(status_code=404, detail='No schedule was found')
+
+  lectures = response.json()['hisTimetable'][1]['row']
+  ret = []
+  log.debug(response.json())
+
+  for lecture in lectures:
+    ret.append({
+      'subject': lecture['ITRT_CNTNT'],
+      'class': {
+        'grade': int(lecture['GRADE']),
+        'class': int(lecture['CLASS_NM']),
+      },
+      'time': {
+        'date': int(lecture['ALL_TI_YMD']) - int(FIRST_DATE_OF_WEEK.strftime('%Y%m%d')),
+        'period': int(lecture['PERIO']),
+      },
+      'classroom': lecture['CLRM_NM'],
+    })
+
+  return {
+    'academicYear': lectures[0]['AY'],
+    'semester': lectures[0]['SEM'],
+    'period': {
+      'begin': FIRST_DATE_OF_WEEK.isoformat(),
+      'end': LAST_DATE_OF_WEEK.isoformat(),
+    },
+    'schedules': ret
+  }

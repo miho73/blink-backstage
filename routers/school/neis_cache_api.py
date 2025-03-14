@@ -58,8 +58,22 @@ def get_cached_meal_data(
   description='Get cached timetable data from NEIS API'
 )
 def get_cached_timetable_data(
-  request: Request,
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection)
 ):
-  pass
+  token = authorize_jwt(jwt)
+  sub = get_sub(token)
+  aud = get_aud(token)
+
+  if not check_role(aud, 'core:user'):
+    raise HTTPException(status_code=403, detail='Forbidden')
+
+  timetable = neis_school_service.get_timetable_data(sub, db)
+
+  return JSONResponse(
+    content={
+      'code': 200,
+      'state': 'OK',
+      'timetable': timetable
+    }
+  )
