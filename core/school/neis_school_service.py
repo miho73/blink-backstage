@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, time, timedelta
 from typing import Type
 from uuid import UUID
+from xml.etree.ElementInclude import include
 
 import requests
 from fastapi import HTTPException
@@ -11,13 +12,14 @@ from sqlalchemy.orm import Session
 from core.config import config
 from core.user.user_info_service import get_identity_by_userid, role_to_school
 from database.database import meal_cache_db
-from models.database_models.relational.schools import School
+from models.database_models.relational.schools import School, SchoolType
 
 log = logging.getLogger(__name__)
 
 SCHOOL_INFO_URL = config['api']['neis']['school_info']
 MEAL_INFO_URL = config['api']['neis']['meal_info']
-SCHOOL_TIMETABLE_URL = config['api']['neis']['high_school_timetable_info']
+HS_TIMETABLE_URL = config['api']['neis']['high_school_timetable_info']
+MS_TIMETABLE_URL = config['api']['neis']['middle_school_timetable_info']
 API_KEY = config['api']['neis']['key']
 
 today = datetime.today()
@@ -137,7 +139,6 @@ def get_timetable_data(
   uid: UUID,
   db: Session
 ) -> dict:
-  # TODO: split logic when the school is middle school
   log.debug('requesting timetable API. uid={}'.format(uid))
 
   identity = get_identity_by_userid(uid, db)
@@ -153,6 +154,13 @@ def get_timetable_data(
   if school is None:
     raise HTTPException(status_code=404, detail='School not found')
 
+  if school.school_type == SchoolType.MIDDLE_SCHOOL:
+    req_url = MS_TIMETABLE_URL
+    lookup_field = 'misTimetable'
+  else:
+    req_url = HS_TIMETABLE_URL
+    lookup_field = 'hisTimetable'
+
   grade = identity.grade
   classroom = identity.classroom
   if classroom is None:
@@ -160,7 +168,7 @@ def get_timetable_data(
 
   log.debug("requesting NEIS timetable API. neis_code={}, grade={}, classroom={}".format(neis_code, grade, classroom))
   response = requests.get(
-    url=SCHOOL_TIMETABLE_URL,
+    url=req_url,
     params={
       'KEY': API_KEY,
       'Type': 'json',
@@ -178,11 +186,11 @@ def get_timetable_data(
     raise HTTPException(status_code=500, detail="NEIS API error")
 
   log.debug(response.json())
-  if 'hisTimetable' not in response.json():
-    log.debug("request field \'hisTimetable\' does not exists in API response")
+  if lookup_field not in response.json():
+    log.debug("request field \'{}\' does not exists in API response".format(lookup_field))
     raise HTTPException(status_code=404, detail='No schedule was found')
 
-  lectures = response.json()['hisTimetable'][1]['row']
+  lectures = response.json()[lookup_field][1]['row']
   ret = []
   log.debug(response.json())
 
@@ -197,7 +205,7 @@ def get_timetable_data(
         'date': int(lecture['ALL_TI_YMD']) - int(FIRST_DATE_OF_WEEK.strftime('%Y%m%d')),
         'period': int(lecture['PERIO']),
       },
-      'classroom': lecture['CLRM_NM'],
+      'classroom': lecture['CLRM_NM'] if 'CLRM_NM' in lecture else None,
     })
 
   return {

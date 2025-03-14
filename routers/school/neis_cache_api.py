@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Request, Security, HTTPException, Depends
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
@@ -9,6 +11,8 @@ from core.user import user_info_service
 from core.user.user_info_service import check_role
 from database.database import create_connection
 from models.database_models.relational.user_preference import UserPreference
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(
   prefix='/api/school/neis/cached',
@@ -69,6 +73,8 @@ def get_cached_timetable_data(
     raise HTTPException(status_code=403, detail='Forbidden')
 
   timetable = neis_school_service.get_timetable_data(sub, db)
+
+  log.debug(timetable)
 
   return JSONResponse(
     content={
