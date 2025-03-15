@@ -192,7 +192,6 @@ def get_timetable_data(
 
   lectures = response.json()[lookup_field][1]['row']
   ret = []
-  log.debug(response.json())
 
   for lecture in lectures:
     ret.append({

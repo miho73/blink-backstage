@@ -74,8 +74,6 @@ def get_cached_timetable_data(
 
   timetable = neis_school_service.get_timetable_data(sub, db)
 
-  log.debug(timetable)
-
   return JSONResponse(
     content={
       'code': 200,

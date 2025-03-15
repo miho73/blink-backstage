@@ -1,8 +1,13 @@
 import logging
 from uuid import UUID
 
+from fastapi import HTTPException
+from sqlalchemy import cast
+from sqlalchemy.dialects.postgresql import TEXT
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.operators import or_
 
+from core.user.user_info_service import get_identity_by_userid, role_to_school
 from models.database_models.relational.social.board import Board
 from models.database_models.relational.social.stared_boards import StaredBoards
 
@@ -38,14 +43,32 @@ def get_user_personalized_board(
   sub: UUID,
   db: Session
 ):
-  boards = db.query(Board).all()
   ret_body = []
+
+  identity = get_identity_by_userid(sub, db)
+  student_verified, neis_code = role_to_school(identity.role)
+
+  if not student_verified:
+    raise HTTPException(status_code=403, detail='Forbidden')
+
+  boards = (
+    db.query(Board)
+    .filter(
+      or_(
+        Board.board_id.in_(
+          db.query(StaredBoards.board_id)
+          .filter(StaredBoards.user_id == sub)
+        ),
+        cast(Board.tag, TEXT).contains(neis_code)
+      )
+    )
+    .all()
+  )
 
   for board in boards:
     exists_query = (
       db.query(StaredBoards)
-      .filter_by(user_id=sub)
-      .filter_by(board_id=board.board_id)
+      .filter_by(user_id=sub, board_id=board.board_id)
       .exists()
     )
     exists = db.query(exists_query).scalar()
