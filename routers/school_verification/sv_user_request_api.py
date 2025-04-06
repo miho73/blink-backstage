@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.google.recaptcha_service import verify_recaptcha
+from core.jwt.jwt_service import get_sub
 from core.school_verification.sv import get_request_list, withdraw_verification
 from database.database import create_connection
 from models.database_models.relational.verification import SvRequest
@@ -117,7 +118,7 @@ def withdraw_verification_api(
     raise HTTPException(status_code=400, detail="Recaptcha failed")
 
   token = authorize_jwt(jwt)
-  sub = token.get('sub')
+  sub = get_sub(token)
 
   log.debug('Withdraw verification. sub=\"{}\"'.format(sub))
 

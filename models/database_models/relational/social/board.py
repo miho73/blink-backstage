@@ -25,7 +25,7 @@ class Board(TableBase):
                                     server_default="gen_random_uuid()")
   name: Mapped[str] = Column(VARCHAR(128), nullable=False)
   created_at: Mapped[datetime] = Column(TIMESTAMP, nullable=False, server_default="now()")
-  tag: Mapped[list[str]] = Column(ARRAY(VARCHAR(25)), nullable=False, default=[])
+  tag: Mapped[list[str]] = Column(MutableList.as_mutable(ARRAY(VARCHAR(25))), nullable=False, default=[])
 
   _state: Mapped[int] = Column('state', SMALLINT, nullable=False, server_default="0")
 

@@ -116,7 +116,7 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
     .first()
   )
 
-  if sv.state is not SvState.REQUESTED:
+  if sv.state is not SvState.REQUESTED and sv.state is not SvState.HOLDING:
     log.debug('State for request sv is not REQUESTED. verification_id=\"{}\"'.format(judge.verification_id))
     raise HTTPException(status_code=400, detail="Not requested")
 
@@ -135,7 +135,7 @@ def evaluate_sv(judge: SvEvaluation, db: Session):
     school.user_count = school.user_count + 1
 
 
-def withdraw_verification(sub: int, db: Session):
+def withdraw_verification(sub: UUID, db: Session):
   identity: Type[Identity] = get_identity_by_userid(sub, db)
 
   student_verified, neis_code = role_to_school(identity.role)

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
+from core.jwt.jwt_service import get_sub, get_aud
 from core.school_verification.sv import get_sv_request_detail, get_evidence, evaluate_sv
 from core.user.user_info_service import check_role
 from database.database import create_connection
@@ -124,8 +125,8 @@ def evaluate_sv_api(
   db: Session = Depends(create_connection)
 ):
   token = authorize_jwt(jwt)
-  sub = token.get('sub')
-  aud = token.get('aud')
+  sub = get_sub(token)
+  aud = get_aud(token)
 
   log.debug('Evaluate SV request. sub=\"{}\"'.format(sub))
 
