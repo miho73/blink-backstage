@@ -2,7 +2,7 @@ from enum import Enum
 from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, UUID
-from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT
+from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT, BYTEA
 from sqlalchemy.orm import Mapped
 
 from database.database import TableBase
@@ -34,6 +34,7 @@ class School(TableBase):
   neis_code: Mapped[str] = Column(VARCHAR(10), nullable=False)
   address: Mapped[str] = Column(VARCHAR, nullable=False)
   _sex: Mapped[int] = Column("sex", SMALLINT, nullable=False)
+  homepage: Mapped[str] = Column(VARCHAR, nullable=False)
   user_count: Mapped[int] = Column(INTEGER, nullable=False, default=0)
 
   @property
