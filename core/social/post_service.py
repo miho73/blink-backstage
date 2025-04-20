@@ -13,6 +13,7 @@ from models.database_models.relational.identity import Identity
 from models.database_models.relational.social.board import Board
 from models.database_models.relational.social.board_acl import BoardACLAction
 from models.database_models.relational.social.post import Post
+from models.database_models.relational.social.votes import Votes
 from models.request_models.social.post_request import UploadPostRequest, UpdatePostRequest
 from uuid import UUID as PyUUID
 
@@ -166,11 +167,13 @@ def get_posts(
 
 
 def get_post(
+  sub: PyUUID,
   aud: list[str],
   post_id: PyUUID,
   db: Session
 ):
   post = db.query(Post).filter(Post.post_id == post_id).first()
+  vote = db.query(Votes).filter(Votes.post_id == post_id, Votes.user_id == sub).first()
 
   if check_acl_by_aud(aud, post.board_id, BoardACLAction.READ, db):
     if post is None:
@@ -178,6 +181,76 @@ def get_post(
 
     post.views += 1
     db.commit()
-    return post
+    return (post, vote)
 
   raise HTTPException(403, "User does not have permission to view this post")
+
+
+def vote_post(
+  sub: PyUUID,
+  aud: list[str],
+  post_id: PyUUID,
+  vote: bool,
+  db: Session
+):
+  post: Type[Post] = (
+    db.query(Post)
+      .filter(Post.post_id == post_id).first()
+  )
+
+  if post is None:
+    raise HTTPException(404, "Post not found")
+
+  if check_acl_by_aud(aud, post.board_id, BoardACLAction.WRITE, db):
+    already_votes = (
+      db.query(
+        exists()
+        .where(
+          Votes.post_id == post_id,
+          Votes.user_id == sub
+        )
+      )
+      .scalar()
+    )
+
+    end_vote = None
+
+    if already_votes:
+      previous_vote = (
+        db.query(Votes)
+          .filter(Votes.post_id == post_id, Votes.user_id == sub)
+          .first()
+      )
+      if previous_vote.vote == vote:
+        log.debug("User has already voted on this post and canceling it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub, post_id, vote))
+        db.delete(previous_vote)
+        post.upvote += (-1 if vote else 0)
+        post.downvote += (-1 if not vote else 0)
+        end_vote = None
+
+      else:
+        log.debug("User has already voted on this post and changing it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub, post_id, vote))
+        previous_vote.vote = True if vote else False
+        post.upvote += (1 if vote else -1)
+        post.downvote += (1 if not vote else -1)
+        end_vote = vote
+
+    else:
+      log.debug("User is voting on this post. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub, post_id, vote))
+      new_vote = Votes(
+        post_id=post_id,
+        user_id=sub,
+        vote=True if vote else False
+      )
+      post.upvote += (1 if vote else 0)
+      post.downvote += (1 if not vote else 0)
+      db.add(new_vote)
+      end_vote = vote
+
+    db.commit()
+
+    return post.upvote, post.downvote, end_vote
+
+  else:
+    log.debug("User does not have permission to vote on this post. sub=\"{}\", post_id=\"{}\"".format(sub, post_id))
+    raise HTTPException(403, "User does not have permission to vote on this post")

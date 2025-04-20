@@ -11,7 +11,7 @@ from core.jwt.jwt_service import get_sub, get_aud
 from core.social import post_service
 from core.validation import regex_check
 from database.database import create_connection
-from models.request_models.social.post_request import UploadPostRequest, UpdatePostRequest
+from models.request_models.social.post_request import UploadPostRequest, UpdatePostRequest, VoteRequest
 
 log = logging.getLogger(__name__)
 
@@ -158,7 +158,7 @@ async def get_post(
   sub = get_sub(token)
   aud = get_aud(token)
 
-  post = post_service.get_post(aud, UUID(post_id), db)
+  (post, vote) = post_service.get_post(sub, aud, UUID(post_id), db)
 
   return JSONResponse(
     content={
@@ -176,6 +176,36 @@ async def get_post(
         "views": post.views,
         "upvote": post.upvote,
         "downvote": post.downvote,
+        "vote": vote.vote if vote else None,
+      }
+    }
+  )
+
+@router.post(
+  path='/vote',
+  description='Upvote a post',
+)
+def upvote(
+  vote_request: VoteRequest,
+  jwt: str = Security(authorization_header),
+  db: Session = Depends(create_connection)
+):
+  log.info("Upvoting post. post_id=\"{post_id}\"".format(post_id=vote_request.post_id))
+
+  token = authorize_jwt(jwt)
+  sub = get_sub(token)
+  aud = get_aud(token)
+
+  (up, down, vote) = post_service.vote_post(sub, aud, UUID(vote_request.post_id), vote_request.vote, db)
+
+  return JSONResponse(
+    content={
+      "code": 200,
+      "state": "OK",
+      "votes": {
+        "vote": vote,
+        "upvote": up,
+        "downvote": down
       }
     }
   )

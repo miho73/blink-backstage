@@ -86,3 +86,22 @@ class UpdatePostRequest(BaseModel):
       if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', i):
         raise ValueError("Image id is invalid as of UUID")
     return v
+
+class VoteRequest(BaseModel):
+  vote: bool
+  post_id: str
+
+  class Config:
+    alias_generator = lambda field: ''.join(
+      word.capitalize() if i > 0 else word for i, word in enumerate(field.split('_'))
+    )
+    allow_population_by_field_name = True
+
+  @field_validator("post_id")
+  @classmethod
+  def validate_post_id(cls, v):
+    if len(v) != 36:
+      raise ValueError("Invalid post id")
+    if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', v):
+      raise ValueError("Post id is invalid as of UUID")
+    return v

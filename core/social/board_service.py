@@ -19,6 +19,9 @@ def check_acl(
   action: BoardACLAction,
   db: Session
 ):
+  if 'root:superuser' in identity.role:
+    return True
+
   acls: list[Type[BoardACL]] = (
     db.query(BoardACL)
     .filter(
@@ -42,6 +45,9 @@ def check_acl_by_aud(
   action: BoardACLAction,
   db: Session
 ):
+  if 'root:superuser' in aud:
+    return True
+
   acls: list[Type[BoardACL]] = (
     db.query(BoardACL)
     .filter(
