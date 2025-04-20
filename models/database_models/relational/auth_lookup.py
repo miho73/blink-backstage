@@ -26,7 +26,7 @@ class AuthLookup(TableBase):
     uselist=False,
     backref=backref(
       "auth_lookup",
-      selist=False,
+      uselist=False,
       cascade="all, delete-orphan",
       passive_deletes=True,
     )

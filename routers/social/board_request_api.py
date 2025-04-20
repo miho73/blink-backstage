@@ -111,6 +111,8 @@ def get_board_by_name(
     raise HTTPException(400, "name is too long or too short")
 
   board = board_service.get_board_by_name(name, aud, db)
+  if board is None:
+    raise HTTPException(404, "Board not found")
 
   return JSONResponse(
     status_code=200,
