@@ -21,4 +21,12 @@ class GoogleAuth(TableBase):
 
   last_used: Mapped[datetime] = Column(TIMESTAMP)
 
-  auth_lookup: Mapped[AuthLookup] = relationship("AuthLookup", backref=backref("google_auth", uselist=False))
+  auth_lookup: Mapped[AuthLookup] = relationship(
+    "AuthLookup",
+    backref=backref(
+      "google_auth",
+      uselist=False,
+      cascade="all, delete-orphan",
+      passive_deletes=True,
+    )
+  )

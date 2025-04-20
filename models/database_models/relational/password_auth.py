@@ -17,10 +17,19 @@ class PasswordAuth(TableBase):
                                             nullable=False, server_default='gen_random_uuid()')
   lookup_id: Mapped[PyUUID] = Column(INTEGER, ForeignKey("authentication.auth_lookup.lookup_id"), unique=True,
                                      nullable=False)
-  auth_lookup: Mapped[AuthLookup] = relationship("AuthLookup", backref=backref("password_auth", uselist=False))
 
   user_id: Mapped[str] = Column(VARCHAR(255), nullable=False, unique=True, index=True)
   password: Mapped[str] = Column(CHAR(60), nullable=False)
 
   last_changed: Mapped[datetime] = Column(TIMESTAMP, nullable=False, server_default="now()")
   last_used: Mapped[datetime] = Column(TIMESTAMP)
+
+  auth_lookup: Mapped[AuthLookup] = relationship(
+    "AuthLookup",
+    backref=backref(
+      "password_auth",
+      uselist=False,
+      cascade="all, delete-orphan",
+      passive_deletes=True,
+    )
+  )

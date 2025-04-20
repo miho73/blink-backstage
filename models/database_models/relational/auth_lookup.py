@@ -21,4 +21,13 @@ class AuthLookup(TableBase):
   password: Mapped[bool] = Column(BOOLEAN, nullable=False, server_default=FetchedValue())
   passkey: Mapped[int] = Column(SMALLINT, nullable=False, server_default=FetchedValue())
 
-  identity: Mapped[Identity] = relationship("Identity", uselist=False, backref=backref("auth_lookup", uselist=False))
+  identity: Mapped[Identity] = relationship(
+    "Identity",
+    uselist=False,
+    backref=backref(
+      "auth_lookup",
+      selist=False,
+      cascade="all, delete-orphan",
+      passive_deletes=True,
+    )
+  )

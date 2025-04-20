@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
+from core.jwt.jwt_service import get_aud
 from core.social import board_service, check_acl
 from core.social.board_service import check_acl_by_aud
 from core.user.user_info_service import check_role
@@ -64,7 +65,7 @@ async def get_board(
   log.debug(f"Getting board. board_id=\"{board_id}\"")
 
   token = authorize_jwt(jwt)
-  aud = token.get("aud")
+  aud = get_aud(token)
 
   if board_id is None:
     raise HTTPException(400, "board_id is required")

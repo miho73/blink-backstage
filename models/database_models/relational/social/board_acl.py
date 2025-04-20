@@ -3,9 +3,10 @@ from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, SMALLINT
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship, backref
 
 from database.database import TableBase
+from models.database_models.relational.social.board import Board
 
 
 class BoardACLAction(Enum):
@@ -26,6 +27,17 @@ class BoardACL(TableBase):
   _action_code: Mapped[int] = Column("action_code", SMALLINT, primary_key=True, index=True, nullable=False)
   qualification: Mapped[int] = Column(SMALLINT, nullable=False, primary_key=True)
   priority: Mapped[int] = Column(SMALLINT, nullable=False, server_default='999')
+
+  board: Mapped[Board] = relationship(
+    'Board',
+    uselist=False,
+    backref=backref(
+      'acls',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True
+    )
+  )
 
   @property
   def action_code(self):

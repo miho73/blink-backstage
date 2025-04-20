@@ -18,5 +18,23 @@ class Votes(TableBase):
 
   vote: Mapped[bool] = Column(BOOLEAN, nullable=False)
 
-  post: Mapped[Post] = relationship('Post', uselist=False, backref=backref('votes', uselist=True))
-  voter: Mapped[Identity] = relationship('Identity', uselist=False, backref=backref('votes', uselist=True))
+  post: Mapped[Post] = relationship(
+    'Post',
+    uselist=False,
+    backref=backref(
+      'votes',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True
+    )
+  )
+  voter: Mapped[Identity] = relationship(
+    'Identity',
+    uselist=False,
+    backref=backref(
+      'votes',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True
+    )
+  )

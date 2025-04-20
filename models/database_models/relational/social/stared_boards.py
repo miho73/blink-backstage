@@ -16,5 +16,23 @@ class StaredBoards(TableBase):
   user_id: Mapped[uuid.UUID] = Column(UUID(as_uuid=True), ForeignKey('users.identity.user_id'), primary_key=True, nullable=False)
   board_id: Mapped[uuid.UUID] = Column(UUID(as_uuid=True), ForeignKey('social.board.board_id'), primary_key=True, nullable=False)
 
-  referred_board: Mapped[Board] = relationship('Board', uselist=False, backref=backref('star_list', uselist=True))
-  who_starred: Mapped[Identity] = relationship('Identity', uselist=False, backref=backref('star_list', uselist=True))
+  referred_board: Mapped[Board] = relationship(
+    'Board',
+    uselist=False,
+    backref=backref(
+      'star_list',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True,
+    )
+  )
+  who_starred: Mapped[Identity] = relationship(
+    'Identity',
+    uselist=False,
+    backref=backref(
+      'star_list',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True,
+    )
+  )

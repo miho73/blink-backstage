@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID as PyUUID
 
+from annotated_types.test_cases import cases
 from sqlalchemy import Column, ForeignKey, FetchedValue
 from sqlalchemy.dialects.postgresql import INTEGER, BYTEA, TIMESTAMP, VARCHAR, CHAR, UUID
 from sqlalchemy.orm import relationship, backref, Mapped
@@ -26,5 +27,13 @@ class PasskeyAuth(TableBase):
   aaguid: Mapped[str] = Column(CHAR(36))
   created_at: Mapped[datetime] = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
 
-  auth_lookup: Mapped[AuthLookup] = relationship("AuthLookup", backref=backref("passkey_auth", uselist=True),
-                                                 uselist=False)
+  auth_lookup: Mapped[AuthLookup] = relationship(
+    "AuthLookup",
+    uselist=False,
+    backref=backref(
+      "passkey_auth",
+      uselist=True,
+      cascade="all, delete-orphan",
+      passive_deletes=True,
+    )
+  )

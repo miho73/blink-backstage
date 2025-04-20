@@ -17,4 +17,12 @@ class UserPreference(TableBase):
 
   allergy: Mapped[int] = Column(INTEGER, nullable=False, default=0)
 
-  identity: Mapped[Identity] = relationship("Identity", backref=backref("preference", uselist=False))
+  identity: Mapped[Identity] = relationship(
+    "Identity",
+    backref=backref(
+      "preference",
+      uselist=False,
+      cascade="all, delete-orphan",
+      passive_deletes=True,
+    )
+  )

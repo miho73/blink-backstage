@@ -35,6 +35,15 @@ class Post(TableBase):
 
   edited: Mapped[bool] = Column(INTEGER, nullable=False, server_default=FetchedValue())
 
-  author: Mapped[Identity] = relationship("Identity", uselist=False, backref=backref("posts", uselist=True))
-  school: Mapped[School] = relationship("School", uselist=False, backref=backref("posts", uselist=True))
-  board: Mapped[Board] = relationship("Board", uselist=False, backref=backref("posts", uselist=True))
+  author: Mapped[Identity] = relationship("Identity", uselist=False, backref=backref("posts", uselist=True)) # TODO: decide the destiny of this post when the author is deleted
+  school: Mapped[School] = relationship("School", uselist=False, backref=backref("posts", uselist=True)) # TODO: decide the destiny of this post when the school is deleted
+  board: Mapped[Board] = relationship(
+    'Board',
+    uselist=False,
+    backref=backref(
+      'posts',
+      uselist=True,
+      cascade='all, delete-orphan',
+      passive_deletes=True
+    )
+  )
