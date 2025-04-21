@@ -179,7 +179,8 @@ def get_post(
     if post is None:
       raise HTTPException(404, "Post not found")
 
-    post.views += 1
+    if post.author_id != sub:
+      post.views += 1
     db.commit()
     return (post, vote)
 
