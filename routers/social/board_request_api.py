@@ -9,12 +9,12 @@ from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
 from core.jwt.jwt_service import get_aud
-from core.social import board_service, check_acl
+from core.social import board_service
 from core.social.board_service import check_acl_by_aud
 from core.user.user_info_service import check_role
 from core.validation import validate_all, length_check
 from database.database import create_connection
-from models.database_models.relational.social.board_acl import BoardACL, BoardACLAction
+from models.database_models.relational.social.board_acl import BoardACLAction
 from models.request_models.social.board_request import CreateBoardRequest
 
 log = logging.getLogger(__name__)
@@ -53,6 +53,7 @@ async def create_board(
   else:
     raise HTTPException(403, "User does not have permission to add boards")
 
+
 @router.get(
   path="/{board_id}",
   description="Get board information",
@@ -88,6 +89,7 @@ async def get_board(
     )
   else:
     raise HTTPException(403, "User does not have permission to read this board")
+
 
 @router.get(
   path="",

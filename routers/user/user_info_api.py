@@ -210,6 +210,7 @@ def update_user_api(
     }
   )
 
+
 @router.patch(
   path='/school',
   summary="Update classroom and student number information",
@@ -222,7 +223,9 @@ def update_classroom_snumber(
   token = authorize_jwt(jwt)
   sub = token.get("sub")
 
-  log.debug("Updating classroom and student number information. user_uid=\"{}\", new_classroom=\"{}\", new_snumber=\"{}\"".format(sub, body.classroom, body.student_number))
+  log.debug(
+    "Updating classroom and student number information. user_uid=\"{}\", new_classroom=\"{}\", new_snumber=\"{}\"".format(
+      sub, body.classroom, body.student_number))
 
   update_classroom_and_snumber(sub, body, db)
   log.debug("Classroom and student number information updated. user_uid=\"{}\"".format(sub))

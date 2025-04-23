@@ -46,6 +46,7 @@ async def post(
     }
   )
 
+
 @router.delete(
   path='/{post_id}',
   description='Delete a post',
@@ -70,6 +71,7 @@ async def delete(
     }
   )
 
+
 @router.patch(
   path='/{post_id}',
   description='Edit a post',
@@ -80,7 +82,9 @@ async def edit(
   jwt: str = Security(authorization_header),
   db: Session = Depends(create_connection),
 ):
-  log.info("Editing post. post_id=\"{post_id}\", title=\"{title}\", content=\"{content}\"".format(post_id=post_id, title=body.title, content=body.content))
+  log.info("Editing post. post_id=\"{post_id}\", title=\"{title}\", content=\"{content}\"".format(post_id=post_id,
+                                                                                                  title=body.title,
+                                                                                                  content=body.content))
 
   token = authorize_jwt(jwt)
   sub = get_sub(token)
@@ -94,6 +98,7 @@ async def edit(
       "state": "OK"
     }
   )
+
 
 @router.get(
   path='/list/{board_id}',
@@ -143,6 +148,7 @@ async def get(
     }
   )
 
+
 @router.get(
   path='/{post_id}',
   description='Get a post',
@@ -180,6 +186,7 @@ async def get_post(
       }
     }
   )
+
 
 @router.post(
   path='/vote',

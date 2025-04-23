@@ -3,7 +3,6 @@ import logging
 from datetime import datetime, time, timedelta
 from typing import Type
 from uuid import UUID
-from xml.etree.ElementInclude import include
 
 import requests
 from fastapi import HTTPException
@@ -24,7 +23,7 @@ API_KEY = config['api']['neis']['key']
 
 today = datetime.today()
 FIRST_DATE_OF_WEEK = today - timedelta(days=today.weekday())
-LAST_DATE_OF_WEEK = FIRST_DATE_OF_WEEK + timedelta(days=4) # TODO: CHANGE CACHED DATE EVERYDAY
+LAST_DATE_OF_WEEK = FIRST_DATE_OF_WEEK + timedelta(days=4)  # TODO: CHANGE CACHED DATE EVERYDAY
 
 
 def query_school_info(school_name: str) -> list[dict]:
@@ -66,6 +65,7 @@ def query_school_info(school_name: str) -> list[dict]:
 
   return ret
 
+
 def db_neis_to_school(neis_code: str, db: Session) -> Type[School] | None:
   school = db.query(School).filter(School.neis_code == neis_code).first()
 
@@ -79,10 +79,10 @@ def get_meal_data(neis_code: str) -> dict:
   log.debug('requesting NEIS meal API. neis_code={}'.format(neis_code))
   today = datetime.today().strftime('%Y%m%d')
 
-  cnt = meal_cache_db.exists(neis_code+today)
+  cnt = meal_cache_db.exists(neis_code + today)
   if cnt > 0:
     log.debug('meal cache hit. neis_code={}, day={}'.format(neis_code, today))
-    return json.loads(meal_cache_db.get(neis_code+today))
+    return json.loads(meal_cache_db.get(neis_code + today))
   log.debug('meal cache miss. neis_code={}, day={}'.format(neis_code, today))
 
   response = requests.get(
@@ -109,7 +109,8 @@ def get_meal_data(neis_code: str) -> dict:
 
   for serve in jsn:
     if neis_code != serve['ATPT_OFCDC_SC_CODE'] + serve['SD_SCHUL_CODE']:
-      log.debug('NEIS API returned wrong school code. ignore request. request={}, response={}'.format(neis_code, serve['ATPT_OFCDC_SC_CODE'] + serve['SD_SCHUL_CODE']))
+      log.debug('NEIS API returned wrong school code. ignore request. request={}, response={}'.format(neis_code, serve[
+        'ATPT_OFCDC_SC_CODE'] + serve['SD_SCHUL_CODE']))
       continue
 
     key = serve['MMEAL_SC_CODE']
@@ -127,13 +128,14 @@ def get_meal_data(neis_code: str) -> dict:
   end_of_day = datetime.combine(now.date(), time(23, 59, 59))
   remaining_time = end_of_day - now
   meal_cache_db.set(
-    name=neis_code+today,
+    name=neis_code + today,
     value=json.dumps(ret),
     ex=remaining_time
   )
   log.debug('meal cache set. neis_code={}, ttl={}'.format(neis_code, remaining_time))
 
   return ret
+
 
 def get_timetable_data(
   uid: UUID,

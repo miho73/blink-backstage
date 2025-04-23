@@ -26,6 +26,7 @@ class UpdateUserProfileRequest(BaseModel):
       raise ValueError("Email regex check failed")
     return value
 
+
 class UpdateUserAllergyInformationRequest(BaseModel):
   allergy: int
 
@@ -35,6 +36,7 @@ class UpdateUserAllergyInformationRequest(BaseModel):
     if value != 0 and (value < 2 or value > 524287):
       raise ValueError("Allergy code out of range")
     return value
+
 
 class UpdateClassroomSNumberRequest(BaseModel):
   classroom: Optional[int]

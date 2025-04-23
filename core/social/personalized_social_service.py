@@ -13,6 +13,7 @@ from models.database_models.relational.social.stared_boards import StaredBoards
 
 log = logging.getLogger(__name__)
 
+
 def star_board(
   sub: UUID,
   board_uuid: UUID,
@@ -21,8 +22,8 @@ def star_board(
 ):
   current_state = (
     db.query(StaredBoards)
-      .filter(StaredBoards.user_id == sub, StaredBoards.board_id == board_uuid)
-      .first()
+    .filter(StaredBoards.user_id == sub, StaredBoards.board_id == board_uuid)
+    .first()
   )
 
   if current_state is None:

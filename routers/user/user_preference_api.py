@@ -20,6 +20,7 @@ router = APIRouter(
   tags=['user', 'preference']
 )
 
+
 @router.get(
   path='/allergy',
   summary='Get user allergy preference'

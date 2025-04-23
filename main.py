@@ -9,7 +9,7 @@ from routers.school import school_access_api, neis_school_api, neis_cache_api, c
 from routers.school_verification import sv_request_api, sv_access_api, sv_evaluation_api, \
   sv_user_request_api
 from routers.social import post_request_api, board_request_api
-from routers.user import user_info_api, user_preference_api, personal_social_api
+from routers.user import user_info_api, user_preference_api, personal_social_api, user_access_api
 
 app = FastAPI(
   docs_url="/api/docs",
@@ -32,6 +32,7 @@ app.include_router(passkey_auth_api.router)
 app.include_router(user_info_api.router)
 app.include_router(user_preference_api.router)
 app.include_router(personal_social_api.router)
+app.include_router(user_access_api.router)
 ####################################################
 app.include_router(sv_request_api.router)
 app.include_router(sv_access_api.router)

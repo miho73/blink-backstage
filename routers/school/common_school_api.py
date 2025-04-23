@@ -1,22 +1,22 @@
 from fastapi import APIRouter, Security, Depends, HTTPException
 from sqlalchemy.orm import Session
-from starlette.responses import JSONResponse, Response, FileResponse
+from starlette.responses import JSONResponse
 
 from core.authentication.authorization_service import authorization_header, authorize_jwt
-from core.jwt.jwt_service import get_sub, get_aud
-from core.user import user_info_service
+from core.jwt.jwt_service import get_sub
 from core.user.user_info_service import get_identity_by_userid, role_to_school
 from database.database import create_connection
 from models.database_models.relational.schools import School
 
 router = APIRouter(
-    prefix='/api/school',
-    tags=['school']
+  prefix='/api/school',
+  tags=['school']
 )
 
+
 @router.get(
-    path='',
-    summary="Get one's verified school information",
+  path='',
+  summary="Get one's verified school information",
 )
 def get_school_api(
   jwt: str = Security(authorization_header),

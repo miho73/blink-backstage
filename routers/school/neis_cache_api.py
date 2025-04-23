@@ -19,6 +19,7 @@ router = APIRouter(
   tags=['school', 'neis']
 )
 
+
 @router.get(
   path='/meal',
   description='Get cached meal data from NEIS API'
@@ -56,6 +57,7 @@ def get_cached_meal_data(
       'allergy': allergy_pref
     }
   )
+
 
 @router.get(
   path='/timetable',

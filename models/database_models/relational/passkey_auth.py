@@ -1,7 +1,6 @@
 from datetime import datetime
 from uuid import UUID as PyUUID
 
-from annotated_types.test_cases import cases
 from sqlalchemy import Column, ForeignKey, FetchedValue
 from sqlalchemy.dialects.postgresql import INTEGER, BYTEA, TIMESTAMP, VARCHAR, CHAR, UUID
 from sqlalchemy.orm import relationship, backref, Mapped

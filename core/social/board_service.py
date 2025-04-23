@@ -39,6 +39,7 @@ def check_acl(
       return True
   return False
 
+
 def check_acl_by_aud(
   aud: list[str],
   board_id: PyUUID,
@@ -64,6 +65,7 @@ def check_acl_by_aud(
     if acl.qualification in aud:
       return True
   return False
+
 
 def create_board(
   name: str,

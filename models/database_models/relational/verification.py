@@ -53,7 +53,8 @@ class SvRequest(TableBase):
   _state: Mapped[int] = Column('state', SMALLINT, nullable=False, default=0)
   doc_code: Mapped[str] = Column(VARCHAR(19))
 
-  identity: Mapped[Identity] = relationship("Identity", backref=backref("verification", uselist=True)) # TODO: choose the destiny when the user is deleted
+  identity: Mapped[Identity] = relationship("Identity", backref=backref("verification",
+                                                                        uselist=True))  # TODO: choose the destiny when the user is deleted
 
   @property
   def request_type(self):

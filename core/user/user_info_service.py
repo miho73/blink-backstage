@@ -75,6 +75,7 @@ def role_to_school(roles: list[str]) -> (bool, Optional[str]):
 
   return student_verified, neis_code
 
+
 def check_role(aud: list[str], role: str) -> bool:
   if 'root:superuser' in aud:
     return True

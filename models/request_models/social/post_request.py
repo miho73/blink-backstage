@@ -54,6 +54,7 @@ class UploadPostRequest(BaseModel):
         raise ValueError("Image id is invalid as of UUID")
     return v
 
+
 class UpdatePostRequest(BaseModel):
   title: str
   content: str
@@ -86,6 +87,7 @@ class UpdatePostRequest(BaseModel):
       if not re.match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', i):
         raise ValueError("Image id is invalid as of UUID")
     return v
+
 
 class VoteRequest(BaseModel):
   vote: bool

@@ -28,4 +28,5 @@ class Identity(TableBase):
   grade: Mapped[Optional[int]] = Column(SMALLINT)
   classroom: Mapped[Optional[int]] = Column(SMALLINT)
   student_number: Mapped[Optional[int]] = Column(SMALLINT)
-  role: Mapped[list[str]] = Column('roles', MutableList.as_mutable(ARRAY(VARCHAR(45))), nullable=False, default=['core:user'])
+  role: Mapped[list[str]] = Column('roles', MutableList.as_mutable(ARRAY(VARCHAR(45))), nullable=False,
+                                   default=['core:user'])

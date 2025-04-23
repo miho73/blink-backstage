@@ -43,7 +43,6 @@ def get_sv_request_api(
 
   vid = request.query_params.get('vid')
 
-
   if vid is None:
     log.debug('Verification id was not given.')
     raise HTTPException(status_code=400, detail='vid was not given')

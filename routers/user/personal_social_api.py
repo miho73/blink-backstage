@@ -19,6 +19,7 @@ router = APIRouter(
   tags=['user', 'social']
 )
 
+
 @router.get(
   path='/board/featured',
   tags=['board', 'recommendation'],
@@ -39,12 +40,13 @@ def get_featured_board(
   featured = get_user_personalized_board(sub, db)
 
   return JSONResponse(
-    content = {
+    content={
       'code': 200,
       'state': 'OK',
       'body': featured
     }
   )
+
 
 @router.patch(
   '/board/star',
@@ -67,7 +69,7 @@ def star_board_api(
   db.commit()
 
   return JSONResponse(
-    content = {
+    content={
       'code': 200,
       'state': 'OK'
     }

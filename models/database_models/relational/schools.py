@@ -2,7 +2,7 @@ from enum import Enum
 from uuid import UUID as PyUUID
 
 from sqlalchemy import Column, UUID
-from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT, BYTEA
+from sqlalchemy.dialects.postgresql import INTEGER, VARCHAR, SMALLINT
 from sqlalchemy.orm import Mapped
 
 from database.database import TableBase

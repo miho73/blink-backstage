@@ -22,7 +22,7 @@ class Board(TableBase):
   __table_args__ = {"schema": "social"}
 
   board_id: Mapped[uuid.UUID] = Column(UUID(as_uuid=True), primary_key=True, unique=True, index=True, nullable=False,
-                                    server_default="gen_random_uuid()")
+                                       server_default="gen_random_uuid()")
   name: Mapped[str] = Column(VARCHAR(128), nullable=False)
   created_at: Mapped[datetime] = Column(TIMESTAMP, nullable=False, server_default="now()")
   tag: Mapped[list[str]] = Column(MutableList.as_mutable(ARRAY(VARCHAR(25))), nullable=False, default=[])

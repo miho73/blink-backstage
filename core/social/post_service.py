@@ -1,6 +1,7 @@
 import logging
 import uuid
 from typing import Type
+from uuid import UUID as PyUUID
 
 from fastapi import HTTPException
 from sqlalchemy import exists
@@ -10,12 +11,10 @@ from core.school import neis_school_service
 from core.social.board_service import check_acl, check_acl_by_aud
 from core.user.user_info_service import role_to_school
 from models.database_models.relational.identity import Identity
-from models.database_models.relational.social.board import Board
 from models.database_models.relational.social.board_acl import BoardACLAction
 from models.database_models.relational.social.post import Post
 from models.database_models.relational.social.votes import Votes
 from models.request_models.social.post_request import UploadPostRequest, UpdatePostRequest
-from uuid import UUID as PyUUID
 
 log = logging.getLogger(__name__)
 
@@ -79,6 +78,7 @@ def delete_post(sub, aud, post_id, db):
 
   raise HTTPException(403, "User does not have permission to delete this post")
 
+
 def complete_delete(post, db):
   db.delete(post)
   db.commit()
@@ -123,19 +123,19 @@ def get_posts(
     if head is None:
       return (
         db.query(Post)
-          .filter(Post.board_id == board_id)
-          .order_by(Post.write_time.desc())
-          .limit(10)
-          .all()
+        .filter(Post.board_id == board_id)
+        .order_by(Post.write_time.desc())
+        .limit(10)
+        .all()
       )
     else:
       criterion_exists = (
         db.query(
           exists()
-            .where(
-              Post.post_id == head,
-              Post.board_id == board_id
-            )
+          .where(
+            Post.post_id == head,
+            Post.board_id == board_id
+          )
         )
         .scalar()
       )
@@ -145,22 +145,22 @@ def get_posts(
 
       write_time = (
         db.query(Post.write_time)
-          .filter(
-            Post.post_id == head,
-            Post.board_id == board_id
-          )
-          .scalar_subquery()
+        .filter(
+          Post.post_id == head,
+          Post.board_id == board_id
+        )
+        .scalar_subquery()
       )
 
       return (
         db.query(Post)
-          .filter(
-            Post.board_id == board_id,
-            Post.write_time < write_time
-          )
-          .order_by(Post.write_time.desc())
-          .limit(10)
-          .all()
+        .filter(
+          Post.board_id == board_id,
+          Post.write_time < write_time
+        )
+        .order_by(Post.write_time.desc())
+        .limit(10)
+        .all()
       )
 
   raise HTTPException(403, "User does not have permission to list this board")
@@ -196,7 +196,7 @@ def vote_post(
 ):
   post: Type[Post] = (
     db.query(Post)
-      .filter(Post.post_id == post_id).first()
+    .filter(Post.post_id == post_id).first()
   )
 
   if post is None:
@@ -219,18 +219,24 @@ def vote_post(
     if already_votes:
       previous_vote = (
         db.query(Votes)
-          .filter(Votes.post_id == post_id, Votes.user_id == sub)
-          .first()
+        .filter(Votes.post_id == post_id, Votes.user_id == sub)
+        .first()
       )
       if previous_vote.vote == vote:
-        log.debug("User has already voted on this post and canceling it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub, post_id, vote))
+        log.debug(
+          "User has already voted on this post and canceling it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub,
+                                                                                                                 post_id,
+                                                                                                                 vote))
         db.delete(previous_vote)
         post.upvote += (-1 if vote else 0)
         post.downvote += (-1 if not vote else 0)
         end_vote = None
 
       else:
-        log.debug("User has already voted on this post and changing it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub, post_id, vote))
+        log.debug(
+          "User has already voted on this post and changing it. sub=\"{}\", post_id=\"{}\", vote=\"{}\"".format(sub,
+                                                                                                                post_id,
+                                                                                                                vote))
         previous_vote.vote = True if vote else False
         post.upvote += (1 if vote else -1)
         post.downvote += (1 if not vote else -1)
