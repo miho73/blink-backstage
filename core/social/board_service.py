@@ -37,6 +37,8 @@ def check_acl(
   for acl in acls:
     if acl.qualification in identity.role:
       return True
+
+  log.debug('ACL has been declined. board_id=\"{}\", action=\"{}\" aud=\"{}\"'.format(board_id, action, aud))
   return False
 
 
@@ -64,6 +66,8 @@ def check_acl_by_aud(
   for acl in acls:
     if acl.qualification in aud:
       return True
+
+  log.debug('ACL has been declined. board_id=\"{}\", action=\"{}\" aud=\"{}\"'.format(board_id, action, aud))
   return False
 
 

@@ -5,12 +5,13 @@ from uuid import UUID as PyUUID
 
 from fastapi import HTTPException
 from sqlalchemy import exists
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, InstrumentedAttribute
 
 from core.school import neis_school_service
 from core.social.board_service import check_acl, check_acl_by_aud
 from core.user.user_info_service import role_to_school
 from models.database_models.relational.identity import Identity
+from models.database_models.relational.social.board import Board
 from models.database_models.relational.social.board_acl import BoardACLAction
 from models.database_models.relational.social.post import Post
 from models.database_models.relational.social.votes import Votes
@@ -261,3 +262,21 @@ def vote_post(
   else:
     log.debug("User does not have permission to vote on this post. sub=\"{}\", post_id=\"{}\"".format(sub, post_id))
     raise HTTPException(403, "User does not have permission to vote on this post")
+
+
+def get_board_by_post(
+  post_id: PyUUID,
+  db: Session
+) -> Board:
+  post = (
+    db.query(Post)
+    .filter_by(
+      post_id=post_id
+    )
+    .first()
+  )
+
+  if post is None:
+    raise HTTPException(404, "Post not found")
+
+  return post.board
